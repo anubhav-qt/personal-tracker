@@ -2,18 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
 import { ExpenseForm } from './components/ExpenseForm';
 import { ExpenseList } from './components/ExpenseList';
-import { Dashboard } from './components/Dashboard';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { Settings } from './components/Settings';
 import { CategoryManager } from './components/CategoryManager';
-import { Home, BarChart2, LogOut, DollarSign, ArrowUp, ArrowDown, TrendingUp, Settings as SettingsIcon, Sparkles } from 'lucide-react';
+import { Home, BarChart2, LogOut, DollarSign, ArrowUp, ArrowDown, TrendingUp, Settings as SettingsIcon, Sparkles, Plus, Lightbulb } from 'lucide-react';
 import { Expense, Category, UserSettings } from './types';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { useExpenses } from './hooks/useExpenses';
 import { format } from 'date-fns';
 import { AiInsights } from './components/AiInsights';
+import { SmartMoneyTips } from './components/SmartMoneyTips';
 import { getExpenseInsights, getSmartSavingTips } from './lib/gemini';
+import { ExpenseFormModal } from './components/ExpenseFormModal';
+import { SmartMoneyTipsModal } from './components/SmartMoneyTipsModal';
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -32,9 +34,9 @@ function App() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const [aiTips, setAiTips] = useState<string>('Loading personalized tips...');
-  const [savingsAdvice, setSavingsAdvice] = useState<string>('Analyzing your financial data...');
   const [isTipsLoading, setIsTipsLoading] = useState(true);
-  const [isSavingsLoading, setIsSavingsLoading] = useState(true);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
   
   const { updateTheme, updateCurrency, formatCurrency, theme } = useTheme();
 
@@ -279,7 +281,7 @@ function App() {
 
   const handleEditExpense = (expense: Expense) => {
     setEditingExpense(expense);
-    setActiveView('home'); // Ensure we're on the home view to see the form
+    setIsExpenseModalOpen(true);
   };
 
   // Calculate financial metrics
@@ -405,41 +407,23 @@ function App() {
     }
   };
 
-  // New function to load AI savings advice
-  const loadSavingsAdvice = async () => {
-    if (expenses.length === 0) {
-      setSavingsAdvice("Add some expenses to get personalized savings insights!");
-      setIsSavingsLoading(false);
-      return;
-    }
-    
-    setIsSavingsLoading(true);
-    try {
-      const prompt = `Provide a brief savings insight based on:
-        Total spent: ${formatCurrency(totalSpent)}
-        Monthly budget: ${formatCurrency(monthlyBudget)}
-        Budget remaining: ${formatCurrency(budgetRemaining)}
-        Budget status: ${budgetRemaining >= 0 ? 'Under budget' : 'Over budget'}
-        
-        Keep it to 1-2 sentences, conversational and direct.`;
-      
-      const advice = await getSmartSavingTips(prompt);
-      setSavingsAdvice(advice);
-    } catch (error) {
-      console.error('Error getting AI savings advice:', error);
-      setSavingsAdvice("We're unable to analyze your savings potential right now. Please check back later.");
-    } finally {
-      setIsSavingsLoading(false);
-    }
-  };
-
   // Load AI content when expenses change
   useEffect(() => {
     if (session?.user?.id && expenses.length > 0) {
       loadAiTips();
-      loadSavingsAdvice();
     }
   }, [expenses.length, monthlyBudget]); // reload when expenses or budget changes
+
+  // Add a function to filter expenses from the last week only
+  const getLastWeekExpenses = () => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    return expenses.filter(expense => {
+      const expenseDate = new Date(expense.date);
+      return expenseDate >= oneWeekAgo;
+    });
+  };
 
   if (!session) {
     return (
@@ -514,6 +498,13 @@ function App() {
             <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Expense Tracker</h1>
             <div className="flex items-center gap-4">
               <button
+                onClick={() => setActiveView('settings')}
+                className={`p-2 rounded-full ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} 
+                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200`}
+              >
+                <SettingsIcon size={20} className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`} />
+              </button>
+              <button
                 onClick={handleSignOut}
                 className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md
                 ${theme === 'dark' ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-700 bg-gray-100 hover:bg-gray-200'} 
@@ -529,10 +520,10 @@ function App() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeView === 'home' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left content area (2/3 width on large screens) */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Summary Cards */}
+          <div>
+            {/* Main content - Now taking up full width */}
+            <div className="space-y-6">
+              {/* Top Row: Three cards with equal width */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Total Spent Card */}
                 <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200`}>
@@ -573,39 +564,9 @@ function App() {
                   </div>
                 </div>
                 
-                {/* Month over Month Card */}
-                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200`}>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Month over Month</p>
-                      <p className={`text-2xl font-bold ${
-                        !isIncreased 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {monthOverMonthChange.toFixed(1)}%
-                      </p>
-                    </div>
-                    <div className={`p-2 rounded-full ${
-                      !isIncreased 
-                        ? 'bg-green-100 dark:bg-green-900/50' 
-                        : 'bg-red-100 dark:bg-red-900/50'
-                    }`}>
-                      <TrendingUp size={20} className={
-                        !isIncreased 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : 'text-red-600 dark:text-red-400'
-                      } />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Middle Row: Two-column grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Budget Progress Card */}
                 <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200`}>
-                  <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
                     Budget Progress
                   </h3>
                   <div className="relative pt-1">
@@ -623,7 +584,7 @@ function App() {
                         </span>
                       </div>
                     </div>
-                    <div className={`overflow-hidden h-2 mb-4 text-xs flex rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                    <div className={`overflow-hidden h-2 mb-2 text-xs flex rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
                       <div
                         style={{ width: `${Math.min((totalSpent / monthlyBudget) * 100, 100)}%` }}
                         className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center ${
@@ -635,7 +596,7 @@ function App() {
                         }`}
                       ></div>
                     </div>
-                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       {budgetRemaining >= 0 
                         ? `You have ${formatCurrency(budgetRemaining)} left to spend this month.`
                         : `You've exceeded your monthly budget by ${formatCurrency(Math.abs(budgetRemaining))}.`
@@ -643,14 +604,19 @@ function App() {
                     </p>
                   </div>
                 </div>
+              </div>
 
+              {/* Second Row: Two equal cards with fixed height */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Top Categories Card */}
-                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200`}>
-                  <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Top Spending Categories
-                  </h3>
+                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200 h-80 overflow-auto`}>
+                  <div className={`sticky pb-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} z-20 mb-4 w-full border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+                    <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Top Spending Categories
+                    </h3>
+                  </div>
                   <div className="space-y-4">
-                    {getTopCategories(expenses, 3).map((category, index) => (
+                    {getTopCategories(expenses, 8).map((category, index) => (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center">
                           <div 
@@ -669,160 +635,78 @@ function App() {
                         </div>
                       </div>
                     ))}
-                    {getTopCategories(expenses, 3).length === 0 && (
+                    {getTopCategories(expenses, 8).length === 0 && (
                       <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                         No expense data available yet.
                       </p>
                     )}
                   </div>
                 </div>
-              </div>
 
-              {/* Recent Activity Card */}
-              <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200`}>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Recent Activity
-                  </h3>
-                  <span className={`text-xs px-2 py-1 rounded-full ${theme === 'dark' ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-100 text-blue-800'}`}>
-                    Last 7 days
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  {getRecentActivity(expenses, 3).map((expense, index) => (
-                    <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-full ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
-                          <div 
-                            className="w-2 h-2 rounded-full" 
-                            style={{ backgroundColor: expense.category.color }}
-                          ></div>
+                {/* Recent Activity Card */}
+                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200 h-80 overflow-auto`}>
+                  <div className={`sticky pb-2 flex justify-between items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} z-20 mb-4 w-full border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+                    <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Recent Activity
+                    </h3>
+                    <span className={`text-xs px-2 py-1 rounded-full ${theme === 'dark' ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-100 text-blue-800'}`}>
+                      Last 7 days
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    {getRecentActivity(expenses, 10).map((expense, index) => (
+                      <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                        <div className="flex items-center space-x-3">
+                          <div className={`p-2 rounded-full ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
+                            <div 
+                              className="w-2 h-2 rounded-full" 
+                              style={{ backgroundColor: expense.category.color }}
+                            ></div>
+                          </div>
+                          <div>
+                            <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                              {expense.description}
+                            </p>
+                            <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                              {format(new Date(expense.date), 'MMM d, yyyy')} · {expense.category.name}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                            {expense.description}
-                          </p>
-                          <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {format(new Date(expense.date), 'MMM d, yyyy')} · {expense.category.name}
-                          </p>
-                        </div>
+                        <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {formatCurrency(expense.amount)}
+                        </span>
                       </div>
-                      <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {formatCurrency(expense.amount)}
-                      </span>
-                    </div>
-                  ))}
-                  {getRecentActivity(expenses, 3).length === 0 && (
-                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      No recent activity. Add an expense to get started!
-                    </p>
-                  )}
+                    ))}
+                    {getRecentActivity(expenses, 10).length === 0 && (
+                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        No recent activity. Add an expense to get started!
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Expense List with fixed height */}
+              {/* Expense List */}
               <div className="h-96">
                 <ExpenseList
                   userId={session.user.id}
                   onEditExpense={handleEditExpense}
+                  filterFn={getLastWeekExpenses}
                 />
-              </div>
-            </div>
-
-            {/* Right sidebar (1/3 width on large screens) */}
-            <div className="space-y-6">
-              {/* Expense Form */}
-              <div className="h-auto">
-                <ExpenseForm
-                  categories={categories}
-                  editingExpense={editingExpense}
-                  setEditingExpense={setEditingExpense}
-                  userId={session.user.id}
-                />
-              </div>
-
-              {/* AI-powered Monthly Savings Estimator Card */}
-              <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200`}>
-                <div className="flex items-center mb-4">
-                  <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} flex-1`}>
-                    Savings Insights
-                  </h3>
-                  <Sparkles size={18} className="text-purple-500" />
-                </div>
-                
-                {isSavingsLoading ? (
-                  <div className="flex justify-center py-4">
-                    <div className="animate-pulse flex space-x-2">
-                      <div className="rounded-full bg-slate-400 h-2 w-2"></div>
-                      <div className="rounded-full bg-slate-400 h-2 w-2"></div>
-                      <div className="rounded-full bg-slate-400 h-2 w-2"></div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className={`p-4 rounded-lg mb-4 ${budgetRemaining >= 0 ? theme === 'dark' ? 'bg-purple-900/20' : 'bg-purple-50' : theme === 'dark' ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
-                    <div 
-                      className={`prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert text-purple-300' : 'text-purple-800'}`}
-                      dangerouslySetInnerHTML={{ __html: savingsAdvice }}
-                    ></div>
-                  </div>
-                )}
-                
-                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {budgetRemaining >= 0 
-                    ? `Current savings projection: ${formatCurrency(budgetRemaining * 12)}/year`
-                    : `Current deficit: ${formatCurrency(Math.abs(budgetRemaining))}/month`
-                  }
-                </p>
-              </div>
-
-              {/* AI-powered Tips Card */}
-              <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200`}>
-                <div className="flex items-center mb-4">
-                  <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} flex-1`}>
-                    Smart Money Tips
-                  </h3>
-                  <Sparkles size={18} className="text-purple-500" />
-                </div>
-                
-                {isTipsLoading ? (
-                  <div className="flex justify-center py-4">
-                    <div className="animate-pulse flex space-x-2">
-                      <div className="rounded-full bg-slate-400 h-2 w-2"></div>
-                      <div className="rounded-full bg-slate-400 h-2 w-2"></div>
-                      <div className="rounded-full bg-slate-400 h-2 w-2"></div>
-                    </div>
-                  </div>
-                ) : (
-                  <div 
-                    className={`prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert text-gray-300' : 'text-gray-700'}`}
-                    dangerouslySetInnerHTML={{ __html: aiTips }}
-                  ></div>
-                )}
-                
-                <button 
-                  onClick={loadAiTips}
-                  className={`mt-4 text-xs px-3 py-1 rounded-full ${
-                    theme === 'dark' 
-                      ? 'bg-purple-900/30 text-purple-300 hover:bg-purple-900/50' 
-                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                  } transition-colors duration-200`}
-                >
-                  Refresh tips
-                </button>
               </div>
             </div>
           </div>
         ) : activeView === 'dashboard' ? (
           <div className="space-y-8">
-            <Dashboard
-              expenses={expenses}
-              totalSpent={totalSpent}
-              monthlyBudget={monthlyBudget}
-            />
             <AnalyticsDashboard expenses={expenses} />
           </div>
         ) : activeView === 'ai' ? (
-          <AiInsights expenses={expenses} />
+          <div>
+            <AiInsights 
+              expenses={expenses} 
+              onOpenTips={() => setIsTipsModalOpen(true)}
+            />
+          </div>
         ) : (
           <Settings 
             settings={userSettings}
@@ -833,51 +717,78 @@ function App() {
           />
         )}
       </main>
-
-      {/* Navigation Toggle with Animation - Updated with AI button */}
+      
+      {/* Navigation Toggle with integrated buttons */}
       <div className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-full shadow-lg p-1 z-10 transition-colors duration-200`}>
-        <div className="flex items-center relative">
-          <div 
-            className={`absolute h-full ${
-              activeView === 'home' ? 'left-0' : 
-              activeView === 'dashboard' ? 'left-1/4' : 
-              activeView === 'ai' ? 'left-2/4' : 'left-3/4'
-            } w-1/4 bg-blue-100 dark:bg-blue-900/50 rounded-full transition-all duration-300 ease-in-out`}
-          />
+        <div className="flex items-center justify-center space-x-1 relative">
           <button
             onClick={() => setActiveView('home')}
-            className={`flex items-center justify-center p-3 rounded-full z-10 relative ${
-              activeView === 'home' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+            className={`p-3 rounded-full z-10 ${
+              activeView === 'home' 
+                ? `${theme === 'dark' ? 'bg-blue-900/50 text-blue-400' : 'bg-blue-100 text-blue-600'}`
+                : `text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700`
             } transition-colors duration-200`}
           >
             <Home size={22} />
           </button>
+          
           <button
             onClick={() => setActiveView('dashboard')}
-            className={`flex items-center justify-center p-3 rounded-full z-10 relative ${
-              activeView === 'dashboard' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+            className={`p-3 rounded-full z-10 ${
+              activeView === 'dashboard' 
+                ? `${theme === 'dark' ? 'bg-blue-900/50 text-blue-400' : 'bg-blue-100 text-blue-600'}`
+                : `text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700`
             } transition-colors duration-200`}
           >
             <BarChart2 size={22} />
           </button>
+          
+          {/* Add Expense Button (Center) - aligned with other buttons */}
+          <button
+            onClick={() => {
+              setEditingExpense(null);
+              setIsExpenseModalOpen(true);
+            }}
+            className={`p-3 rounded-full z-20 
+              ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'}
+              text-white shadow-md transition-colors duration-200`}
+          >
+            <Plus size={24} />
+          </button>
+          
           <button
             onClick={() => setActiveView('ai')}
-            className={`flex items-center justify-center p-3 rounded-full z-10 relative ${
-              activeView === 'ai' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+            className={`p-3 rounded-full z-10 ${
+              activeView === 'ai' 
+                ? `${theme === 'dark' ? 'bg-blue-900/50 text-blue-400' : 'bg-blue-100 text-blue-600'}`
+                : `text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700`
             } transition-colors duration-200`}
           >
             <Sparkles size={22} />
           </button>
-          <button
-            onClick={() => setActiveView('settings')}
-            className={`flex items-center justify-center p-3 rounded-full z-10 relative ${
-              activeView === 'settings' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-            } transition-colors duration-200`}
-          >
-            <SettingsIcon size={22} />
-          </button>
         </div>
       </div>
+
+      {/* Modals */}
+      {isExpenseModalOpen && (
+        <ExpenseFormModal
+          categories={categories}
+          editingExpense={editingExpense}
+          setEditingExpense={setEditingExpense}
+          userId={session.user.id}
+          onClose={() => setIsExpenseModalOpen(false)}
+        />
+      )}
+
+      {isTipsModalOpen && (
+        <SmartMoneyTipsModal
+          tips={aiTips}
+          isLoading={isTipsLoading}
+          onRefresh={loadAiTips}
+          onClose={() => setIsTipsModalOpen(false)}
+          theme={theme}
+        />
+      )}
 
       {/* Category Manager Modal */}
       {isCategoryManagerOpen && (

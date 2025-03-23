@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { getExpenseInsights } from '../lib/gemini';
 import { Expense } from '../types';
 import { useTheme } from '../context/ThemeContext';
-import { Sparkles, Send, RefreshCw, HelpCircle } from 'lucide-react';
+import { Sparkles, Send, RefreshCw, HelpCircle, Lightbulb } from 'lucide-react';
 
 interface AiInsightsProps {
   expenses: Expense[];
+  onOpenTips?: () => void;
 }
 
-export function AiInsights({ expenses }: AiInsightsProps) {
+export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
   const { theme } = useTheme();
   const [aiResponse, setAiResponse] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -123,16 +124,29 @@ export function AiInsights({ expenses }: AiInsightsProps) {
 
   return (
     <div className={`max-w-4xl mx-auto ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md overflow-hidden transition-colors duration-200`}>
-      <div className={`p-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-blue-50'} flex items-center gap-3`}>
-        <Sparkles className={`${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`} />
-        <div>
-          <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            AI Financial Assistant
-          </h2>
-          <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-            Ask questions about your finances and get personalized advice
-          </p>
+      <div className={`p-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-blue-50'} flex items-center justify-between`}>
+        <div className="flex items-center gap-3">
+          <Sparkles className={`${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`} />
+          <div>
+            <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              AI Financial Assistant
+            </h2>
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+              Ask questions about your finances and get personalized advice
+            </p>
+          </div>
         </div>
+        {onOpenTips && (
+          <button
+            onClick={onOpenTips}
+            className={`p-2 rounded-full flex items-center justify-center ${
+              theme === 'dark' ? 'bg-gray-600 hover:bg-gray-500 text-blue-400' : 'bg-blue-100 hover:bg-blue-200 text-blue-600'
+            } transition-colors duration-200`}
+            title="Smart Money Tips"
+          >
+            <Lightbulb size={18} />
+          </button>
+        )}
       </div>
       
       <div className={`p-6 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} space-y-4`}>

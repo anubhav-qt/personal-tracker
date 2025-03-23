@@ -8,9 +8,10 @@ import { useExpenses } from '../hooks/useExpenses';
 interface ExpenseListProps {
   userId: string;
   onEditExpense: (expense: Expense) => void;
+  filterFn?: (expenses: Expense[]) => Expense[]; // Add this new prop
 }
 
-export const ExpenseList = React.memo(({ userId, onEditExpense }: ExpenseListProps) => {
+export const ExpenseList = React.memo(({ userId, onEditExpense, filterFn }: ExpenseListProps) => {
   const { theme, formatCurrency } = useTheme();
   const { 
     expenses: fetchedExpenses, 
@@ -25,9 +26,10 @@ export const ExpenseList = React.memo(({ userId, onEditExpense }: ExpenseListPro
   // Update localExpenses whenever fetchedExpenses changes
   useEffect(() => {
     console.log('ExpenseList: Setting local expenses from fetchedExpenses', fetchedExpenses.length);
-    // Using a functional update ensures we have the latest state
-    setLocalExpenses(fetchedExpenses);
-  }, [fetchedExpenses]);
+    // Apply filter if provided, otherwise use all expenses
+    const filteredExpenses = filterFn ? filterFn(fetchedExpenses) : fetchedExpenses;
+    setLocalExpenses(filteredExpenses);
+  }, [fetchedExpenses, filterFn]);
 
   const handleDelete = async (id: string) => {
     console.log('Deleting expense:', id);

@@ -9,29 +9,35 @@ interface ExpenseFormProps {
   editingExpense: Expense | null;
   setEditingExpense: (expense: Expense | null) => void;
   userId: string;
+  onSuccess?: () => void; // Add this new prop
 }
 
 export const ExpenseForm = React.memo(({ 
   categories, 
   editingExpense, 
   setEditingExpense,
-  userId 
+  userId,
+  onSuccess
 }: ExpenseFormProps) => {
   const { theme } = useTheme();
   const { addExpense, updateExpense } = useExpenses(userId);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Update form when editing an expense or reset when not editing
   useEffect(() => {
     if (editingExpense) {
       setAmount(editingExpense.amount.toString());
       setDescription(editingExpense.description);
       setCategoryId(editingExpense.category_id);
       setDate(editingExpense.date);
+    } else {
+      // Always set today's date when not editing
+      setDate(new Date().toISOString().split('T')[0]);
     }
   }, [editingExpense]);
 
@@ -39,6 +45,7 @@ export const ExpenseForm = React.memo(({
     setAmount('');
     setDescription('');
     setCategoryId('');
+    // Update date to today when resetting form
     setDate(new Date().toISOString().split('T')[0]);
     setError(null);
     setEditingExpense(null);
@@ -85,6 +92,12 @@ export const ExpenseForm = React.memo(({
 
       // Clear form
       resetForm();
+      
+      // Call onSuccess if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+      
     } catch (error: any) {
       console.error('Error saving expense:', error);
       setError(error.message || 'An error occurred while saving the expense');
