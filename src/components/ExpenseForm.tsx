@@ -98,7 +98,7 @@ export const ExpenseForm = React.memo(({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200`}>
+    <form onSubmit={handleSubmit} className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200 flex flex-col w-full h-full`}>
       <div className="flex justify-between items-center mb-4">
         <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
           {editingExpense ? 'Edit Expense' : 'Add New Expense'}
@@ -120,7 +120,7 @@ export const ExpenseForm = React.memo(({
         </div>
       )}
       
-      <div className="grid gap-4">
+      <div className="grid gap-4 flex-1">
         <div>
           <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Amount</label>
           <input
@@ -189,23 +189,25 @@ export const ExpenseForm = React.memo(({
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          {editingExpense ? (
-            <>
-              <Save size={20} />
-              {isLoading ? 'Updating...' : 'Update Expense'}
-            </>
-          ) : (
-            <>
-              <PlusCircle size={20} />
-              {isLoading ? 'Adding...' : 'Add Expense'}
-            </>
-          )}
-        </button>
+        <div className="mt-6">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {editingExpense ? (
+              <>
+                <Save size={20} />
+                {isLoading ? 'Updating...' : 'Update Expense'}
+              </>
+            ) : (
+              <>
+                <PlusCircle size={20} />
+                {isLoading ? 'Adding...' : 'Add Expense'}
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </form>
   );

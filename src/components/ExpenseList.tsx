@@ -40,7 +40,7 @@ export const ExpenseList = React.memo(({ userId, onEditExpense }: ExpenseListPro
   };
 
   return (
-    <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md overflow-hidden transition-colors duration-200`}>
+    <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md overflow-hidden transition-colors duration-200 flex flex-col w-full h-full`}>
       <div className={`p-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} border-b flex items-center justify-between transition-colors duration-200`}>
         <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>Recent Expenses</h2>
         <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ export const ExpenseList = React.memo(({ userId, onEditExpense }: ExpenseListPro
         </div>
       </div>
       
-      <div className="overflow-x-auto">
+      <div className="overflow-y-auto flex-grow scrollbar-thin" style={{ maxHeight: "calc(100% - 57px)" }}>
         {isLoading && localExpenses.length === 0 ? (
           <div className={`flex justify-center items-center py-10 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
             <RefreshCw size={24} className="animate-spin mr-2" />
@@ -65,7 +65,7 @@ export const ExpenseList = React.memo(({ userId, onEditExpense }: ExpenseListPro
           </div>
         ) : localExpenses.length > 0 ? (
           <table className={`min-w-full divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'} transition-colors duration-200`}>
-            <thead className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'} transition-colors duration-200`}>
+            <thead className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'} transition-colors duration-200 sticky top-0 z-10`}>
               <tr>
                 <th className={`px-6 py-3 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider transition-colors duration-200`}>Date</th>
                 <th className={`px-6 py-3 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider transition-colors duration-200`}>Description</th>

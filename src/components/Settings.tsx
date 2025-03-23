@@ -164,7 +164,7 @@ export function Settings({ settings, onSaveSettings, onExportCSV, onManageCatego
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-6 overflow-y-auto hide-scrollbar">
           {message && (
             <div className={`mb-6 p-4 rounded-md flex items-center ${
               message.type === 'success' 

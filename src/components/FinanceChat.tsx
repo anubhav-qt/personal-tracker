@@ -115,7 +115,7 @@ export function FinanceChat({ isOpen, onToggle, expenses }: FinanceChatProps) {
         </button>
       </div>
       
-      <div className={`flex-1 overflow-y-auto p-4 space-y-3 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className={`flex-1 overflow-y-auto p-4 space-y-3 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} hide-scrollbar`}>
         {messages.map((message, index) => (
           <div 
             key={index} 

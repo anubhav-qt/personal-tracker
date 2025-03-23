@@ -1,3 +1,63 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom Scrollbar Styles */
+@layer base {
+  /* Light mode scrollbar */
+  :root {
+    --scrollbar-track: #f1f1f1;
+    --scrollbar-thumb: #c1c1c1;
+    --scrollbar-thumb-hover: #a8a8a8;
+  }
+
+  /* Dark mode scrollbar */
+  .dark {
+    --scrollbar-track: #1f2937;
+    --scrollbar-thumb: #4b5563;
+    --scrollbar-thumb-hover: #6b7280;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  /* Webkit browsers (Chrome, Safari, Edge, etc) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+
+  /* For the expense list specifically, we need to ensure the scrollbar is visible */
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 8px;
+    display: block;
+  }
+  
+  /* Hide scrollbar when not hovering for cleaner UI in content areas */
+  .hide-scrollbar::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+  
+  .hide-scrollbar:hover::-webkit-scrollbar {
+    width: 8px;
+  }
+}
