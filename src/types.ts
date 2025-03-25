@@ -20,3 +20,17 @@ export interface UserSettings {
   theme: 'light' | 'dark';
   currency: string;
 }
+
+export interface UpcomingPayment {
+  id: string;
+  user_id: string;
+  title: string;
+  amount: number;
+  due_date: string;
+  is_paid: boolean;
+  is_recurring: boolean;
+  category_id: string;
+  category?: Category;
+  created_at: string;
+  updated_at: string;
+}

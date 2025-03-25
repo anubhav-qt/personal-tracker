@@ -30,9 +30,21 @@ export function useExpenses(userId: string | undefined) {
       if (error) throw error;
       console.log('Expenses fetched successfully:', data?.length || 0, 'records');
       
+      // Process data to ensure all properties are valid
+      const processedData = (data || []).map(expense => {
+        // If category is null, provide a default
+        if (!expense.category) {
+          expense.category = {
+            id: null,
+            name: 'Uncategorized',
+            color: '#cccccc'
+          };
+        }
+        return expense;
+      });
+      
       // Important: create a new array reference to ensure React detects the change
-      const newExpenses = [...(data || [])];
-      setExpenses(newExpenses);
+      setExpenses(processedData);
       setLastRefreshTime(new Date());
       initialLoadComplete.current = true;
     } catch (err: any) {
@@ -125,7 +137,7 @@ export function useExpenses(userId: string | undefined) {
       console.log('Adding new expense:', expenseData);
       const { data, error } = await supabase
         .from('expenses')
-        .insert([expenseData])
+        .insert([{ ...expenseData, user_id: userId }])
         .select(`
           *,
           category:categories(id, name, color)

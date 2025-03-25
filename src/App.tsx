@@ -6,7 +6,7 @@ import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { Settings } from './components/Settings';
 import { CategoryManager } from './components/CategoryManager';
 import { Home, BarChart2, LogOut, DollarSign, ArrowUp, ArrowDown, TrendingUp, Settings as SettingsIcon, Sparkles, Plus, Lightbulb } from 'lucide-react';
-import { Expense, Category, UserSettings } from './types';
+import { Expense, Category, UserSettings, UpcomingPayment } from './types';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { useExpenses } from './hooks/useExpenses';
@@ -16,6 +16,8 @@ import { SmartMoneyTips } from './components/SmartMoneyTips';
 import { getExpenseInsights, getSmartSavingTips } from './lib/gemini';
 import { ExpenseFormModal } from './components/ExpenseFormModal';
 import { SmartMoneyTipsModal } from './components/SmartMoneyTipsModal';
+import { UpcomingPayments } from './components/UpcomingPayments';
+import { PaymentFormModal } from './components/PaymentFormModal';
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -37,6 +39,8 @@ function App() {
   const [isTipsLoading, setIsTipsLoading] = useState(true);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<UpcomingPayment | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   
   const { updateTheme, updateCurrency, formatCurrency, theme } = useTheme();
 
@@ -323,7 +327,7 @@ function App() {
       const row = [
         expense.date,
         expense.description,
-        expense.category.name,
+        expense.category?.name || 'Uncategorized',
         expense.amount.toString()
       ];
       csvRows.push(row);
@@ -609,43 +613,45 @@ function App() {
               {/* Second Row: Two equal cards with fixed height */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Top Categories Card */}
-                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200 h-80 overflow-auto`}>
-                  <div className={`sticky pb-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} z-20 mb-4 w-full border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md transition-colors duration-200 h-80 flex flex-col overflow-hidden`}>
+                  <div className={`p-6 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} border-b`}>
                     <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Top Spending Categories
                     </h3>
                   </div>
-                  <div className="space-y-4">
-                    {getTopCategories(expenses, 8).map((category, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div 
-                            className="w-3 h-3 rounded-full mr-2" 
-                            style={{ backgroundColor: category.color }}
-                          ></div>
-                          <span className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                            {category.name}
-                          </span>
+                  <div className="flex-1 overflow-y-auto p-6">
+                    <div className="space-y-4">
+                      {getTopCategories(expenses, 8).map((category, index) => (
+                        <div key={index} className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div 
+                              className="w-3 h-3 rounded-full mr-2" 
+                              style={{ backgroundColor: category.color }}
+                            ></div>
+                            <span className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                              {category.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium">{formatCurrency(category.amount)}</span>
+                            <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                              {((category.amount / totalSpent) * 100).toFixed(0)}%
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium">{formatCurrency(category.amount)}</span>
-                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {((category.amount / totalSpent) * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                    {getTopCategories(expenses, 8).length === 0 && (
-                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        No expense data available yet.
-                      </p>
-                    )}
+                      ))}
+                      {getTopCategories(expenses, 8).length === 0 && (
+                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          No expense data available yet.
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {/* Recent Activity Card */}
-                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md transition-colors duration-200 h-80 overflow-auto`}>
-                  <div className={`sticky pb-2 flex justify-between items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} z-20 mb-4 w-full border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md transition-colors duration-200 h-80 flex flex-col overflow-hidden`}>
+                  <div className={`p-6 flex justify-between items-center ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} border-b`}>
                     <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Recent Activity
                     </h3>
@@ -653,47 +659,52 @@ function App() {
                       Last 7 days
                     </span>
                   </div>
-                  <div className="space-y-3">
-                    {getRecentActivity(expenses, 10).map((expense, index) => (
-                      <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                        <div className="flex items-center space-x-3">
-                          <div className={`p-2 rounded-full ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
-                            <div 
-                              className="w-2 h-2 rounded-full" 
-                              style={{ backgroundColor: expense.category.color }}
-                            ></div>
+                  <div className="flex-1 overflow-y-auto p-6">
+                    <div className="space-y-3">
+                      {getRecentActivity(expenses, 10).map((expense, index) => {
+                        const categoryColor = expense.category ? expense.category.color : '#cccccc'; // Default color
+                        return (
+                          <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                            <div className="flex items-center space-x-3">
+                              <div className={`p-2 rounded-full ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
+                                <div 
+                                  className="w-2 h-2 rounded-full" 
+                                  style={{ backgroundColor: categoryColor }}
+                                ></div>
+                              </div>
+                              <div>
+                                <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                  {expense.description}
+                                </p>
+                                <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  {format(new Date(expense.date), 'MMM d, yyyy')} · {expense.category?.name || 'Uncategorized'}
+                                </p>
+                              </div>
+                            </div>
+                            <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                              {formatCurrency(expense.amount)}
+                            </span>
                           </div>
-                          <div>
-                            <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                              {expense.description}
-                            </p>
-                            <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                              {format(new Date(expense.date), 'MMM d, yyyy')} · {expense.category.name}
-                            </p>
-                          </div>
-                        </div>
-                        <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          {formatCurrency(expense.amount)}
-                        </span>
-                      </div>
-                    ))}
-                    {getRecentActivity(expenses, 10).length === 0 && (
-                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        No recent activity. Add an expense to get started!
-                      </p>
-                    )}
+                        );
+                      })}
+                      {getRecentActivity(expenses, 10).length === 0 && (
+                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          No recent activity. Add an expense to get started!
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Expense List */}
-              <div className="h-96">
-                <ExpenseList
-                  userId={session.user.id}
-                  onEditExpense={handleEditExpense}
-                  filterFn={getLastWeekExpenses}
-                />
-              </div>
+              {/* Replace ExpenseList with UpcomingPayments */}
+              <UpcomingPayments 
+                userId={session.user.id} 
+                onAddPayment={() => {
+                  setEditingPayment(null);
+                  setIsPaymentModalOpen(true);
+                }}
+              />
             </div>
           </div>
         ) : activeView === 'dashboard' ? (
@@ -777,6 +788,15 @@ function App() {
           setEditingExpense={setEditingExpense}
           userId={session.user.id}
           onClose={() => setIsExpenseModalOpen(false)}
+        />
+      )}
+
+      {isPaymentModalOpen && (
+        <PaymentFormModal
+          userId={session.user.id}
+          categories={categories}
+          editingPayment={editingPayment}
+          onClose={() => setIsPaymentModalOpen(false)}
         />
       )}
 
