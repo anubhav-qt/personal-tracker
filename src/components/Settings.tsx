@@ -13,27 +13,18 @@ interface SettingsProps {
 
 export function Settings({ settings, onSaveSettings, onExportCSV, onManageCategories, expenses }: SettingsProps) {
   const [monthlyBudget, setMonthlyBudget] = useState(settings.monthlyBudget.toString());
-  const [theme, setTheme] = useState<'light' | 'dark'>(settings.theme);
   const [currency, setCurrency] = useState(settings.currency);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [activeSection, setActiveSection] = useState('general');
   
-  const { theme: currentTheme, currencySymbol, updateTheme, updateCurrency } = useTheme();
+  const { theme: currentTheme, currencySymbol, updateCurrency } = useTheme();
   
   // Ensure settings are in sync with props
   useEffect(() => {
     setMonthlyBudget(settings.monthlyBudget.toString());
-    setTheme(settings.theme);
     setCurrency(settings.currency);
   }, [settings]);
-
-  // Update local theme context when theme changes
-  useEffect(() => {
-    if (theme !== currentTheme) {
-      updateTheme(theme);
-    }
-  }, [theme, currentTheme, updateTheme]);
 
   // Update local currency context when currency changes
   useEffect(() => {
@@ -46,15 +37,12 @@ export function Settings({ settings, onSaveSettings, onExportCSV, onManageCatego
     setMessage(null);
 
     try {
+      // Explicitly only include the properties defined in our UserSettings type
       const newSettings: UserSettings = {
         monthlyBudget: parseFloat(monthlyBudget),
-        theme,
         currency,
+        // No theme property
       };
-
-      // Apply theme immediately before saving
-      updateTheme(theme);
-      updateCurrency(currency);
 
       await onSaveSettings(newSettings);
       setMessage({ type: 'success', text: 'Settings saved successfully!' });
@@ -102,27 +90,6 @@ export function Settings({ settings, onSaveSettings, onExportCSV, onManageCatego
                 >
                   <Sliders className="mr-3 h-5 w-5" />
                   <span>General</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setActiveSection('appearance')}
-                  className={`w-full flex items-center px-4 py-3 rounded-lg transition-colors duration-200 ${
-                    activeSection === 'appearance'
-                      ? currentTheme === 'dark' 
-                        ? 'bg-gray-700 text-white'
-                        : 'bg-white text-blue-600 shadow-sm'
-                      : currentTheme === 'dark'
-                        ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                        : 'text-gray-700 hover:bg-white hover:text-blue-600 hover:shadow-sm'
-                  }`}
-                >
-                  {currentTheme === 'dark' ? (
-                    <Moon className="mr-3 h-5 w-5" />
-                  ) : (
-                    <Sun className="mr-3 h-5 w-5" />
-                  )}
-                  <span>Appearance</span>
                 </button>
               </li>
               <li>
@@ -196,58 +163,6 @@ export function Settings({ settings, onSaveSettings, onExportCSV, onManageCatego
                   <p className="text-sm text-blue-700 dark:text-blue-300">
                     Your changes are saved automatically when you modify settings.
                   </p>
-                </div>
-              </div>
-            )}
-
-            {/* Appearance Settings */}
-            {activeSection === 'appearance' && (
-              <div className="space-y-6">
-                <h3 className={`text-lg font-medium ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  Appearance
-                </h3>
-
-                <div>
-                  <label className={`block text-sm font-medium ${currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-700'} mb-2`}>
-                    Theme
-                  </label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setTheme('light')}
-                      className={`relative flex flex-col items-center p-4 rounded-lg border-2 ${
-                        theme === 'light'
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                          : 'border-gray-200 dark:border-gray-700'
-                      } transition-colors duration-200`}
-                    >
-                      {theme === 'light' && (
-                        <div className="absolute top-2 right-2 w-4 h-4 bg-blue-500 rounded-full"></div>
-                      )}
-                      <Sun className={`h-8 w-8 mb-2 ${theme === 'light' ? 'text-blue-500' : 'text-gray-400'}`} />
-                      <span className={`text-sm font-medium ${theme === 'light' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'}`}>
-                        Light Mode
-                      </span>
-                    </button>
-                    
-                    <button
-                      type="button"
-                      onClick={() => setTheme('dark')}
-                      className={`relative flex flex-col items-center p-4 rounded-lg border-2 ${
-                        theme === 'dark'
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                          : 'border-gray-200 dark:border-gray-700'
-                      } transition-colors duration-200`}
-                    >
-                      {theme === 'dark' && (
-                        <div className="absolute top-2 right-2 w-4 h-4 bg-blue-500 rounded-full"></div>
-                      )}
-                      <Moon className={`h-8 w-8 mb-2 ${theme === 'dark' ? 'text-blue-500' : 'text-gray-400'}`} />
-                      <span className={`text-sm font-medium ${theme === 'dark' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'}`}>
-                        Dark Mode
-                      </span>
-                    </button>
-                  </div>
                 </div>
               </div>
             )}

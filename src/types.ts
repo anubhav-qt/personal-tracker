@@ -17,8 +17,8 @@ export interface Expense {
 
 export interface UserSettings {
   monthlyBudget: number;
-  theme: 'light' | 'dark';
   currency: string;
+  // theme property has been removed as it's now handled via localStorage only
 }
 
 export interface UpcomingPayment {

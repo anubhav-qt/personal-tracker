@@ -121,32 +121,32 @@ export function PaymentFormModal({
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         {/* Overlay */}
         <div 
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm transition-opacity"
           aria-hidden="true"
           onClick={onClose}
         ></div>
 
         {/* Modal Container */}
-        <div className="inline-block align-bottom rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} px-4 pt-5 pb-4 sm:p-6 sm:pb-4 relative`}>
+        <div className="inline-block align-bottom rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} px-6 pt-6 pb-6 sm:p-6 relative`}>
             <button
               onClick={onClose}
-              className={`absolute top-4 right-4 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`absolute top-4 right-4 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200' : 'text-zinc-500 hover:text-zinc-700'}`}
             >
               <X size={24} />
             </button>
             
-            <div className="sm:flex sm:items-start mb-4">
+            <div className="sm:flex sm:items-start mb-6">
               <div className={`mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full ${
-                theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-600'
+                theme === 'dark' ? 'bg-lime-900/30 text-lime-400' : 'bg-lime-100 text-lime-600'
               } sm:mx-0 sm:h-10 sm:w-10`}>
                 <Clock size={20} />
               </div>
               <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 className={`text-lg leading-6 font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className={`text-lg leading-6 font-medium ${theme === 'dark' ? 'text-white' : 'text-zinc-800'}`}>
                   {editingPayment ? 'Edit Payment' : 'Add Upcoming Payment'}
                 </h3>
-                <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-zinc-500'}`}>
                   {editingPayment 
                     ? 'Update the details of your upcoming payment.' 
                     : 'Add a new payment to keep track of your upcoming expenses.'}
@@ -155,31 +155,31 @@ export function PaymentFormModal({
             </div>
             
             {error && (
-              <div className={`mb-4 p-3 rounded ${theme === 'dark' ? 'bg-red-900/30 text-red-300' : 'bg-red-50 text-red-700'} text-sm`}>
+              <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-red-900/30 text-red-300' : 'bg-red-50 text-red-700'} text-sm`}>
                 {error}
               </div>
             )}
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-zinc-700'} mb-1`}>
                   Title
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className={`block w-full rounded-md shadow-sm ${
+                  className={`block w-full rounded-xl shadow-sm ${
                     theme === 'dark' 
                       ? 'bg-gray-700 border-gray-600 text-white' 
-                      : 'border-gray-300 text-gray-900'
-                  } focus:border-blue-500 focus:ring-blue-500`}
+                      : 'border-zinc-300 text-zinc-800 bg-zinc-50'
+                  } focus:border-lime-500 focus:ring-lime-500 px-4 py-2.5`}
                   required
                 />
               </div>
               
               <div>
-                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-zinc-700'} mb-1`}>
                   Amount
                 </label>
                 <input
@@ -188,44 +188,44 @@ export function PaymentFormModal({
                   step="0.01"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className={`block w-full rounded-md shadow-sm ${
+                  className={`block w-full rounded-xl shadow-sm ${
                     theme === 'dark' 
                       ? 'bg-gray-700 border-gray-600 text-white' 
-                      : 'border-gray-300 text-gray-900'
-                  } focus:border-blue-500 focus:ring-blue-500`}
+                      : 'border-zinc-300 text-zinc-800 bg-zinc-50'
+                  } focus:border-lime-500 focus:ring-lime-500 px-4 py-2.5`}
                   required
                 />
               </div>
               
               <div>
-                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-zinc-700'} mb-1`}>
                   Due Date
                 </label>
                 <input
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className={`block w-full rounded-md shadow-sm ${
+                  className={`block w-full rounded-xl shadow-sm ${
                     theme === 'dark' 
                       ? 'bg-gray-700 border-gray-600 text-white' 
-                      : 'border-gray-300 text-gray-900'
-                  } focus:border-blue-500 focus:ring-blue-500`}
+                      : 'border-zinc-300 text-zinc-800 bg-zinc-50'
+                  } focus:border-lime-500 focus:ring-lime-500 px-4 py-2.5`}
                   required
                 />
               </div>
               
               <div>
-                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-zinc-700'} mb-1`}>
                   Category
                 </label>
                 <select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  className={`block w-full rounded-md shadow-sm ${
+                  className={`block w-full rounded-xl shadow-sm ${
                     theme === 'dark' 
                       ? 'bg-gray-700 border-gray-600 text-white' 
-                      : 'border-gray-300 text-gray-900'
-                  } focus:border-blue-500 focus:ring-blue-500`}
+                      : 'border-zinc-300 text-zinc-800 bg-zinc-50'
+                  } focus:border-lime-500 focus:ring-lime-500 px-4 py-2.5`}
                 >
                   <option value="">Select a category</option>
                   {categories.map((category) => (
@@ -245,11 +245,11 @@ export function PaymentFormModal({
                     onChange={(e) => setIsRecurring(e.target.checked)}
                     className={`h-4 w-4 rounded ${
                       theme === 'dark' 
-                        ? 'bg-gray-700 border-gray-600 text-blue-600' 
-                        : 'border-gray-300 text-blue-600'
-                    } focus:ring-blue-500`}
+                        ? 'bg-gray-700 border-gray-600 text-lime-600' 
+                        : 'border-zinc-300 text-lime-600'
+                    } focus:ring-lime-500`}
                   />
-                  <label htmlFor="is-recurring" className={`ml-2 block text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <label htmlFor="is-recurring" className={`ml-2 block text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-zinc-700'}`}>
                     Recurring Payment
                   </label>
                 </div>
@@ -262,11 +262,11 @@ export function PaymentFormModal({
                     onChange={(e) => setIsPaid(e.target.checked)}
                     className={`h-4 w-4 rounded ${
                       theme === 'dark' 
-                        ? 'bg-gray-700 border-gray-600 text-blue-600' 
-                        : 'border-gray-300 text-blue-600'
-                    } focus:ring-blue-500`}
+                        ? 'bg-gray-700 border-gray-600 text-lime-600' 
+                        : 'border-zinc-300 text-lime-600'
+                    } focus:ring-lime-500`}
                   />
-                  <label htmlFor="is-paid" className={`ml-2 block text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <label htmlFor="is-paid" className={`ml-2 block text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-zinc-700'}`}>
                     Already Paid
                   </label>
                 </div>
@@ -276,11 +276,11 @@ export function PaymentFormModal({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 ${
+                  className={`w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-5 py-2.5 ${
                     theme === 'dark' 
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
-                  } text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm disabled:opacity-50`}
+                      ? 'bg-lime-600 hover:bg-lime-700 text-white' 
+                      : 'bg-lime-600 hover:bg-lime-700 text-white'
+                  } text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lime-500 sm:text-sm disabled:opacity-50`}
                 >
                   {isLoading ? (
                     <span className="flex items-center">
