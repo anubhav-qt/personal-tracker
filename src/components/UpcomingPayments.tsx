@@ -214,26 +214,26 @@ export function UpcomingPayments({ userId, onAddPayment }: UpcomingPaymentsProps
                     : theme === 'dark' ? 'text-gray-400' : 'text-zinc-500';
                 
                 return (
-                  <div key={date} className="pb-3">
+                  <div key={date} className="pb-2">
                     <div className="flex items-center mb-2">
-                      <p className={`text-sm ${dateLabelClass}`}>
+                      <p className={`text-xs ${dateLabelClass}`}>
                         {isToday ? 'Today - ' : ''}{formattedDate}
                       </p>
                     </div>
                     
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {groupedPayments[date].map((payment) => {
                         const overdueStatus = isOverdue(payment.due_date, payment.is_paid);
                         
                         return (
                           <div 
                             key={payment.id} 
-                            className={`flex justify-between items-center p-3.5 rounded-xl ${
+                            className={`flex justify-between items-center p-3 rounded-[30px] ${
                               payment.is_paid
-                                ? theme === 'dark' ? 'bg-gray-700/50' : 'bg-zinc-100/90'
+                                ? theme === 'dark' ? 'bg-gray-700/30' : 'bg-zinc-100/90'
                                 : overdueStatus
                                   ? theme === 'dark' ? 'bg-red-900/20' : 'bg-red-50'
-                                  : theme === 'dark' ? 'bg-gray-700' : 'bg-zinc-50'
+                                  : theme === 'dark' ? 'bg-gray-700/50' : 'bg-white/80 border border-gray-100'
                             } shadow-sm`}
                           >
                             <div className="flex items-center space-x-3">

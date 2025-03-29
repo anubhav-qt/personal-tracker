@@ -1,10 +1,6 @@
 import React from 'react';
 import { Expense, UserSettings, UpcomingPayment } from '../types';
-import { RecentActivity } from './dashboard/RecentActivity';
-import { UpcomingPayments } from './UpcomingPayments';
 import { BudgetStats } from './dashboard/BudgetStats';
-import { TopCategories } from './dashboard/TopCategories';
-import { Plus } from 'lucide-react';
 
 interface MainDashboardProps {
   expenses: Expense[];
@@ -16,7 +12,7 @@ interface MainDashboardProps {
   onAddPayment: () => void;
   onEditPayment: (payment: UpcomingPayment) => void;
   userId: string;
-  onToggleTheme: () => void; // Add this prop
+  onToggleTheme: () => void;
 }
 
 export function MainDashboard({
@@ -61,110 +57,73 @@ export function MainDashboard({
     
   const isIncreased = monthOverMonthChange > 0;
 
-  // Function to get recent activity
-  const getRecentActivity = (expenses: Expense[], limit: number) => {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
-    return expenses
-      .filter(expense => new Date(expense.date) >= sevenDaysAgo)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, limit);
-  };
-
-  // Function to get top categories
-  const getTopCategories = (expenses: Expense[], limit: number) => {
-    const categoryMap = new Map<string, { name: string, amount: number, color: string }>();
-    
-    expenses.forEach(expense => {
-      const categoryName = expense.category?.name || 'Uncategorized';
-      const categoryColor = expense.category?.color || '#808080';
-      
-      if (categoryMap.has(categoryName)) {
-        const existing = categoryMap.get(categoryName)!;
-        existing.amount += expense.amount;
-        categoryMap.set(categoryName, existing);
-      } else {
-        categoryMap.set(categoryName, { 
-          name: categoryName, 
-          amount: expense.amount,
-          color: categoryColor
-        });
-      }
-    });
-    
-    return Array.from(categoryMap.values())
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, limit);
+  // Stylized blank card component
+  const BlankCard = ({ label }: { label: string }) => {
+    return (
+      <div className="relative h-full w-full rounded-[30px] overflow-hidden">
+        <div 
+          className={`absolute inset-0 flex items-center justify-center font-bold text-2xl text-white 
+                    ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-[#191a19]'}`}
+        >
+          {label}
+        </div>
+        <div 
+          className={`absolute top-0 right-0 w-1/5 h-1/5 rounded-bl-[100%]
+                    ${theme === 'dark' ? 'bg-gray-700/70' : 'bg-[#3f4344]'}
+                    transition-all duration-500 z-10 hover:w-full hover:h-full hover:rounded-[30px]
+                    group-hover:w-full group-hover:h-full group-hover:rounded-[30px]`}
+        ></div>
+        <div 
+          className={`absolute bottom-0 left-0 w-1/5 h-1/5 rounded-tr-[100%]
+                    ${theme === 'dark' ? 'bg-gray-700/70' : 'bg-[#3f4344]'}
+                    transition-all duration-500 z-20 hover:w-full hover:h-full hover:rounded-[30px]
+                    group-hover:w-full group-hover:h-full group-hover:rounded-[30px]
+                    hover:after:content-['COMING_SOON'] after:flex after:items-center after:justify-center
+                    after:text-white after:font-bold after:text-2xl`}
+        ></div>
+      </div>
+    );
   };
 
   return (
-    <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Recent Activity */}
-        <div className="rounded-2xl shadow-sm overflow-hidden bg-lime-200 dark:bg-gray-800 transition-all duration-200">
-          <div className="p-6 flex justify-between items-center border-b border-lime-300 dark:border-gray-700">
-            <h3 className="text-lg font-medium text-zinc-800 dark:text-white">Recent Activity</h3>
-            <span className="text-xs px-3 py-1 rounded-full bg-white/80 dark:bg-gray-700 text-zinc-800 dark:text-blue-400 font-medium shadow-sm">
-              Last 7 days
-            </span>
+    <div className="flex justify-center">
+      <div 
+        className="scale-75 origin-center"
+        style={{
+          margin: '-12.5% 0', // This creates a negative margin equal to 25% of the scaled height (100%-75%=25%, divided by 2 for top/bottom)
+          width: '133.33%',   // This compensates for the scale (1/0.75 = 1.3333...)
+        }}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Card 1 - Top Left */}
+          <div className="rounded-[30px] p-6 overflow-hidden h-[618px] group cursor-pointer">
+            <BlankCard label="FEATURE 1" />
           </div>
-          <div className="h-[360px] overflow-y-auto p-6 space-y-3">
-            <RecentActivity 
-              recentActivity={getRecentActivity(expenses, 10)} 
-              formatCurrency={formatCurrency}
-              onEditExpense={onEditExpense}
-              theme={theme}
-            />
-          </div>
-        </div>
 
-        {/* Upcoming Payments */}
-        <div className="rounded-2xl shadow-sm overflow-hidden bg-white dark:bg-gray-800 transition-all duration-200">
-          <div className="p-6 border-b border-zinc-200 dark:border-gray-700 flex justify-between items-center">
-            <h3 className="text-lg font-medium text-zinc-800 dark:text-white">Upcoming Payments</h3>
-            <button
-              onClick={onAddPayment}
-              className="p-2 rounded-full bg-zinc-100 dark:bg-gray-700 text-zinc-800 dark:text-white hover:bg-zinc-200 dark:hover:bg-gray-600 transition-colors duration-200"
-            >
-              <Plus size={16} />
-            </button>
-          </div>
-          <div className="h-[360px] overflow-y-auto p-6">
-            <UpcomingPayments 
-              userId={userId}
-              onAddPayment={onAddPayment}
-            />
-          </div>
-        </div>
-
-        {/* Budget Stats */}
-        <div className="rounded-2xl p-6 transition-all duration-200">
-          <BudgetStats
-            totalSpent={totalSpent}
-            budgetRemaining={budgetRemaining}
-            monthOverMonthChange={monthOverMonthChange}
-            isIncreased={isIncreased}
-            monthlyBudget={monthlyBudget}
-            userSettings={userSettings}
-            formatCurrency={formatCurrency}
-            theme={theme}
-            onToggleTheme={onToggleTheme}
-          />
-        </div>
-
-        {/* Top Categories */}
-        <div className="rounded-2xl shadow-sm overflow-hidden bg-lime-200 dark:bg-gray-800 transition-all duration-200">
-          <div className="p-6 border-b border-lime-300 dark:border-gray-700">
-            <h3 className="text-lg font-medium text-zinc-800 dark:text-white">Top Spending Categories</h3>
-          </div>
-          <div className="h-[360px] overflow-y-auto p-6">
-            <TopCategories 
-              topCategories={getTopCategories(expenses, 8)} 
+          {/* Budget Stats - Top Right */}
+          <div className="rounded-[30px] p-6 transition-all duration-200">
+            <BudgetStats
               totalSpent={totalSpent}
+              budgetRemaining={budgetRemaining}
+              monthOverMonthChange={monthOverMonthChange}
+              isIncreased={isIncreased}
+              monthlyBudget={monthlyBudget}
+              userSettings={userSettings}
               formatCurrency={formatCurrency}
               theme={theme}
+              onToggleTheme={onToggleTheme}
+              expenses={expenses} // Pass expenses to BudgetStats
             />
+          </div>
+
+          {/* Card 3 - Bottom Left */}
+          <div className="rounded-[30px] p-6 overflow-hidden h-[618px] group cursor-pointer">
+            <BlankCard label="FEATURE 2" />
+          </div>
+
+          {/* Card 4 - Bottom Right */}
+          <div className="rounded-[30px] p-6 overflow-hidden h-[618px] group cursor-pointer">
+            <BlankCard label="FEATURE 3" />
           </div>
         </div>
       </div>

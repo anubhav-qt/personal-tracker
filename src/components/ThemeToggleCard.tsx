@@ -3,9 +3,16 @@ import styled from 'styled-components';
 interface ThemeToggleCardProps {
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
+  timeRange?: 'week' | 'month';
+  onTimeRangeChange?: (range: 'week' | 'month') => void;
 }
 
-const ThemeToggleCard = ({ theme, onToggleTheme }: ThemeToggleCardProps) => {
+const ThemeToggleCard = ({ 
+  theme, 
+  onToggleTheme,
+  timeRange = 'month',
+  onTimeRangeChange
+}: ThemeToggleCardProps) => {
   return (
     <StyledWrapper>
       <div>
@@ -19,7 +26,27 @@ const ThemeToggleCard = ({ theme, onToggleTheme }: ThemeToggleCardProps) => {
           <div className="body">
             <div className="phone">
               <div className="menu">
-                <div className="time">4:20</div>
+                {onTimeRangeChange ? (
+                  <div className="time-selector">
+                    <span className="time-label">View Analytics:</span>
+                    <div className="time-toggle">
+                      <button 
+                        className={`time-btn ${timeRange === 'week' ? 'active' : ''}`}
+                        onClick={() => onTimeRangeChange('week')}
+                      >
+                        Weekly
+                      </button>
+                      <button 
+                        className={`time-btn ${timeRange === 'month' ? 'active' : ''}`}
+                        onClick={() => onTimeRangeChange('month')}
+                      >
+                        Monthly
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="time"></div>
+                )}
               </div>
               <div className="content">
                 <div className="circle">
@@ -91,19 +118,60 @@ const StyledWrapper = styled.div`
 
   /* Top */
   .menu {
-    /*   background-color: blue; */
     font-size: 80%;
-    opacity: 0.4;
+    opacity: 0.95;
     padding: 0.8rem 1.8rem;
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-pack: justify;
-    -ms-flex-pack: justify;
     justify-content: space-between;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
     align-items: center;
+  }
+
+  /* Time selector styles */
+  .time-selector {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    opacity: 1;
+    width: 100%;
+    color: white;
+  }
+
+  .time-label {
+    margin-left: 5px;
+    margin-right: 5px;
+    color: white;
+    font-weight: 500;
+  }
+
+  .time-toggle {
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 2px;
+    width: 50%;
+    justify-content: space-between;
+    gap: 2px;
+  }
+
+  .time-btn {
+    border: none;
+    background: none;
+    border-radius: 10px;
+    height: 20px;
+    flex: 1;
+    font-size: 11px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    padding: 0 8px;
+  }
+
+  .time-btn.active {
+    background-color: #3b82f6;
+    color: white;
   }
 
   .icons {
@@ -284,6 +352,10 @@ const StyledWrapper = styled.div`
     color: white;
   }
 
+  [type="checkbox"]:checked + .app .time-selector {
+    color: white;
+  }
+
   [type="checkbox"]:checked + .app .body .phone .menu .time {
     color: white;
   }
@@ -298,22 +370,6 @@ const StyledWrapper = styled.div`
 
   [type="checkbox"]:checked + .app .body {
     border-radius: 40px;
-  }
-
-  .menu {
-    /*   background-color: blue; */
-    font-size: 80%;
-    opacity: 0.4;
-    padding: 0.8rem 1.8rem;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-pack: justify;
-    -ms-flex-pack: justify;
-    justify-content: space-between;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center;
   }
 `;
 
