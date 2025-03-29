@@ -27,7 +27,8 @@ export function ExpenseTracking({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('month');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  // Changed default view to grid
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
   
   // Fetch expenses
@@ -207,23 +208,47 @@ export function ExpenseTracking({
             </button>
           </div>
 
-          {/* Time filters */}
-          <div className={`p-1 rounded-lg flex ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <button
+          {/* Time filters - Updated to match Spending Analytics style */}
+          <div className="time-toggle flex">
+            <button 
+              className={`px-2.5 py-1 text-xs font-medium rounded-l-lg border ${
+                timeFilter === 'week' 
+                  ? theme === 'dark' 
+                    ? 'bg-purple-600 text-white border-purple-500' 
+                    : 'bg-lime-600 text-white border-lime-500' 
+                  : theme === 'dark' 
+                    ? 'border-gray-600 text-gray-300' 
+                    : 'border-gray-300 text-gray-600'
+              } transition-colors`}
               onClick={() => setTimeFilter('week')}
-              className={`px-3 py-1 text-xs rounded ${timeFilter === 'week' ? theme === 'dark' ? 'bg-gray-600 text-white' : 'bg-white text-gray-800 shadow-sm' : ''}`}
             >
               Weekly
             </button>
-            <button
+            <button 
+              className={`px-2.5 py-1 text-xs font-medium border ${
+                timeFilter === 'month' 
+                  ? theme === 'dark' 
+                    ? 'bg-purple-600 text-white border-purple-500' 
+                    : 'bg-lime-600 text-white border-lime-500' 
+                  : theme === 'dark' 
+                    ? 'border-gray-600 text-gray-300' 
+                    : 'border-gray-300 text-gray-600'
+              } transition-colors`}
               onClick={() => setTimeFilter('month')}
-              className={`px-3 py-1 text-xs rounded ${timeFilter === 'month' ? theme === 'dark' ? 'bg-gray-600 text-white' : 'bg-white text-gray-800 shadow-sm' : ''}`}
             >
               Monthly
             </button>
-            <button
+            <button 
+              className={`px-2.5 py-1 text-xs font-medium rounded-r-lg border ${
+                timeFilter === 'all' 
+                  ? theme === 'dark' 
+                    ? 'bg-purple-600 text-white border-purple-500' 
+                    : 'bg-lime-600 text-white border-lime-500' 
+                  : theme === 'dark' 
+                    ? 'border-gray-600 text-gray-300' 
+                    : 'border-gray-300 text-gray-600'
+              } transition-colors`}
               onClick={() => setTimeFilter('all')}
-              className={`px-3 py-1 text-xs rounded ${timeFilter === 'all' ? theme === 'dark' ? 'bg-gray-600 text-white' : 'bg-white text-gray-800 shadow-sm' : ''}`}
             >
               All Time
             </button>
@@ -240,8 +265,8 @@ export function ExpenseTracking({
         </div>
       </div>
 
-      {/* Summary card */}
-      <div className={`mb-6 p-4 rounded-[20px] ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-100'} shadow-sm`}>
+      {/* Summary card - Updated styling to match UpcomingPayments */}
+      <div className={`mb-6 p-4 rounded-[15px] ${theme === 'dark' ? 'bg-gray-700' : 'bg-white border border-gray-100'} shadow-sm`}>
         <div className="flex items-center justify-between">
           <div>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -251,8 +276,8 @@ export function ExpenseTracking({
               {formatCurrency(totalAmount)}
             </p>
           </div>
-          <div className={`p-3 rounded-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-blue-50'}`}>
-            <Calendar size={20} className={theme === 'dark' ? 'text-gray-300' : 'text-blue-600'} />
+          <div className={`p-3 rounded-full ${theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-blue-600'}`}>
+            <Calendar size={20} />
           </div>
         </div>
       </div>
@@ -302,13 +327,13 @@ export function ExpenseTracking({
                       <div 
                         key={expense.id} 
                         className={`flex justify-between items-center p-3 rounded-[15px] ${
-                          theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-100'
+                          theme === 'dark' ? 'bg-gray-700 hover:bg-gray-700/80' : 'bg-white hover:bg-gray-50 border border-gray-100'
                         } shadow-sm transition-colors duration-200`}
                       >
                         <div className="flex items-center space-x-3">
                           <div 
                             className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                              theme === 'dark' ? 'bg-gray-600' : 'bg-gray-100'
                             }`}
                             style={{ backgroundColor: expense.category?.color + '20' }}
                           >
@@ -362,19 +387,19 @@ export function ExpenseTracking({
             })}
           </div>
         ) : (
-          // Grid view
+          // Grid view - Updated styling to match UpcomingPayments
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {filteredExpenses.map((expense) => (
               <div
                 key={expense.id}
                 className={`p-4 rounded-[15px] ${
-                  theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-100'
+                  theme === 'dark' ? 'bg-gray-700 hover:bg-gray-700/80' : 'bg-white hover:bg-gray-50 border border-gray-100'
                 } shadow-sm transition-colors duration-200`}
               >
                 <div className="flex justify-between items-start mb-3">
                   <div 
                     className={`px-2 py-1 rounded text-xs ${
-                      theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
+                      theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-600'
                     }`}
                   >
                     {format(new Date(expense.date), 'MMM d, yyyy')}
@@ -382,7 +407,7 @@ export function ExpenseTracking({
                   <div className="flex space-x-1">
                     <button
                       onClick={() => onEditExpense(expense)}
-                      className={`p-1 rounded-full ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}
+                      className={`p-1.5 rounded-full ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}
                       title="Edit expense"
                     >
                       <Edit size={14} />
@@ -390,7 +415,7 @@ export function ExpenseTracking({
                     <button
                       onClick={() => handleDeleteExpense(expense.id)}
                       disabled={deletingExpenseId === expense.id}
-                      className={`p-1 rounded-full ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-400 hover:text-red-300' : 'hover:bg-gray-100 text-gray-500 hover:text-red-500'} disabled:opacity-50`}
+                      className={`p-1.5 rounded-full ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-400 hover:text-red-300' : 'hover:bg-gray-100 text-gray-500 hover:text-red-500'} disabled:opacity-50`}
                       title="Delete expense"
                     >
                       {deletingExpenseId === expense.id ? (

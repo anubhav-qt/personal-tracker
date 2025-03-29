@@ -13,7 +13,7 @@ import { Settings } from './components/Settings';
 import { CategoryManager } from './components/CategoryManager';
 import { ExpenseFormModal } from './components/ExpenseFormModal';
 import { SmartMoneyTipsModal } from './components/SmartMoneyTipsModal';
-import { PaymentFormModal } from './components/PaymentFormModal';
+import { UpcomingPaymentFormModal } from './components/UpcomingPaymentFormModal';
 import { getSmartSavingTips } from './lib/gemini';
 import { Fitness } from './components/Fitness';
 import { Academics } from './components/Academics';
@@ -431,10 +431,11 @@ function App() {
       )}
 
       {isPaymentModalOpen && (
-        <PaymentFormModal
+        <UpcomingPaymentFormModal
           userId={session.user.id}
           categories={categories}
           editingPayment={editingPayment}
+          setEditingPayment={setEditingPayment}
           onClose={() => setIsPaymentModalOpen(false)}
         />
       )}

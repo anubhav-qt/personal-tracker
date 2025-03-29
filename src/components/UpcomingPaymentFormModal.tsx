@@ -1,53 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { Category, Expense } from '../types';
+import { Category, UpcomingPayment } from '../types';
 import { useTheme } from '../context/ThemeContext';
-import { X, PlusCircle, Save } from 'lucide-react';
-import { useExpenses } from '../hooks/useExpenses';
+import { X, PlusCircle, Save, Clock, Repeat } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
-interface ExpenseFormModalProps {
+interface UpcomingPaymentFormModalProps {
   categories: Category[];
-  editingExpense: Expense | null;
-  setEditingExpense: (expense: Expense | null) => void;
+  editingPayment: UpcomingPayment | null;
+  setEditingPayment: (payment: UpcomingPayment | null) => void;
   userId: string;
   onClose: () => void;
 }
 
-export const ExpenseFormModal = ({ 
+export const UpcomingPaymentFormModal = ({ 
   categories, 
-  editingExpense, 
-  setEditingExpense,
+  editingPayment, 
+  setEditingPayment,
   userId,
   onClose
-}: ExpenseFormModalProps) => {
+}: UpcomingPaymentFormModalProps) => {
   const { theme } = useTheme();
-  const { addExpense, updateExpense } = useExpenses(userId);
+  const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [categoryId, setCategoryId] = useState('');
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Update form when editing an expense or reset when not editing
+  // Update form when editing a payment or reset when not editing
   useEffect(() => {
-    if (editingExpense) {
-      setAmount(editingExpense.amount.toString());
-      setDescription(editingExpense.description);
-      setCategoryId(editingExpense.category_id);
-      setDate(editingExpense.date);
+    if (editingPayment) {
+      setTitle(editingPayment.title);
+      setAmount(editingPayment.amount.toString());
+      setDueDate(editingPayment.due_date);
+      setCategoryId(editingPayment.category_id || '');
+      setIsRecurring(editingPayment.is_recurring);
+      setIsPaid(editingPayment.is_paid);
     } else {
-      // Always set today's date when not editing
-      setDate(new Date().toISOString().split('T')[0]);
+      // Reset form for new payment
+      setTitle('');
+      setAmount('');
+      setDueDate(new Date().toISOString().split('T')[0]);
+      setCategoryId('');
+      setIsRecurring(false);
+      setIsPaid(false);
     }
-  }, [editingExpense]);
+  }, [editingPayment]);
 
   const resetForm = () => {
+    setTitle('');
     setAmount('');
-    setDescription('');
+    setDueDate(new Date().toISOString().split('T')[0]);
     setCategoryId('');
-    setDate(new Date().toISOString().split('T')[0]);
+    setIsRecurring(false);
+    setIsPaid(false);
     setError(null);
-    setEditingExpense(null);
+    setEditingPayment(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,30 +66,37 @@ export const ExpenseFormModal = ({
     setError(null);
 
     try {
-      if (editingExpense) {
-        // Update existing expense
-        const result = await updateExpense(editingExpense.id, {
-          amount: parseFloat(amount),
-          description,
-          category_id: categoryId,
-          date
-        });
+      const paymentData = {
+        title,
+        amount: parseFloat(amount),
+        due_date: dueDate,
+        category_id: categoryId || null,
+        is_recurring: isRecurring,
+        is_paid: isPaid,
+        user_id: userId,
+        updated_at: new Date().toISOString(),
+        created_at: editingPayment ? undefined : new Date().toISOString() // Set created_at for new records only
+      };
 
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to update expense');
+      if (editingPayment) {
+        // Update existing payment
+        const { error } = await supabase
+          .from('upcoming_payments')
+          .update(paymentData)
+          .eq('id', editingPayment.id)
+          .eq('user_id', userId); // Add user_id check for additional security
+
+        if (error) {
+          throw new Error(error.message || 'Failed to update payment');
         }
       } else {
-        // Create new expense
-        const result = await addExpense({
-          user_id: userId,
-          amount: parseFloat(amount),
-          description,
-          category_id: categoryId,
-          date
-        });
+        // Create new payment
+        const { error } = await supabase
+          .from('upcoming_payments')
+          .insert(paymentData);
 
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to add expense');
+        if (error) {
+          throw new Error(error.message || 'Failed to add payment');
         }
       }
 
@@ -88,8 +105,8 @@ export const ExpenseFormModal = ({
       onClose();
       
     } catch (error: any) {
-      console.error('Error saving expense:', error);
-      setError(error.message || 'An error occurred while saving the expense');
+      console.error('Error saving payment:', error);
+      setError(error.message || 'An error occurred while saving the payment');
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +139,7 @@ export const ExpenseFormModal = ({
           <div className={`${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} px-6 pt-6 pb-6 sm:p-6 relative`}>
             <div className="flex justify-between items-center mb-4">
               <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {editingExpense ? 'Edit Expense' : 'Add New Expense'}
+                {editingPayment ? 'Edit Payment' : 'Add New Payment'}
               </h2>
               <button
                 onClick={onClose}
@@ -140,13 +157,11 @@ export const ExpenseFormModal = ({
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Amount</label>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Title</label>
                 <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   className={`mt-1 block w-full rounded-md ${
                     theme === 'dark' 
                       ? 'bg-gray-700 border-gray-600 text-white' 
@@ -157,11 +172,13 @@ export const ExpenseFormModal = ({
               </div>
 
               <div>
-                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Description</label>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Amount</label>
                 <input
-                  type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
                   className={`mt-1 block w-full rounded-md ${
                     theme === 'dark' 
                       ? 'bg-gray-700 border-gray-600 text-white' 
@@ -181,7 +198,6 @@ export const ExpenseFormModal = ({
                       ? 'bg-gray-700 border-gray-600 text-white' 
                       : 'border-gray-300 text-gray-900'
                   } shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-colors duration-200`}
-                  required
                 >
                   <option value="">Select a category</option>
                   {categories.map((category) => (
@@ -193,11 +209,11 @@ export const ExpenseFormModal = ({
               </div>
 
               <div>
-                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Date</label>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Due Date</label>
                 <input
                   type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
                   className={`mt-1 block w-full rounded-md ${
                     theme === 'dark' 
                       ? 'bg-gray-700 border-gray-600 text-white' 
@@ -207,21 +223,63 @@ export const ExpenseFormModal = ({
                 />
               </div>
 
+              <div className="flex space-x-6 mt-2">
+                <div className="flex items-center">
+                  <input
+                    id="is-recurring"
+                    type="checkbox"
+                    checked={isRecurring}
+                    onChange={(e) => setIsRecurring(e.target.checked)}
+                    className={`h-4 w-4 rounded ${
+                      theme === 'dark' 
+                        ? 'bg-gray-700 border-gray-600 text-purple-600' 
+                        : 'border-gray-300 text-purple-600'
+                    } focus:ring-purple-500`}
+                  />
+                  <label htmlFor="is-recurring" className={`ml-2 block text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <div className="flex items-center">
+                      <Repeat size={14} className="mr-1" />
+                      Recurring Payment
+                    </div>
+                  </label>
+                </div>
+                
+                <div className="flex items-center">
+                  <input
+                    id="is-paid"
+                    type="checkbox"
+                    checked={isPaid}
+                    onChange={(e) => setIsPaid(e.target.checked)}
+                    className={`h-4 w-4 rounded ${
+                      theme === 'dark' 
+                        ? 'bg-gray-700 border-gray-600 text-purple-600' 
+                        : 'border-gray-300 text-purple-600'
+                    } focus:ring-purple-500`}
+                  />
+                  <label htmlFor="is-paid" className={`ml-2 block text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <div className="flex items-center">
+                      <Clock size={14} className="mr-1" />
+                      Already Paid
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <div className="mt-6">
                 <button
                   type="submit"
                   disabled={isLoading}
                   className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-2.5 px-4 rounded-xl shadow-sm transition-colors duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {editingExpense ? (
+                  {editingPayment ? (
                     <>
                       <Save size={18} />
-                      {isLoading ? 'Updating...' : 'Update Expense'}
+                      {isLoading ? 'Updating...' : 'Update Payment'}
                     </>
                   ) : (
                     <>
                       <PlusCircle size={18} />
-                      {isLoading ? 'Adding...' : 'Add Expense'}
+                      {isLoading ? 'Adding...' : 'Add Payment'}
                     </>
                   )}
                 </button>

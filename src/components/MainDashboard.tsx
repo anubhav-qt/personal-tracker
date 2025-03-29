@@ -7,6 +7,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip
 } from 'recharts';
 import { ExpenseTracking } from './ExpenseTracking';
+import { UpcomingPayments } from './UpcomingPayments';
 
 interface MainDashboardProps {
   expenses: Expense[];
@@ -65,9 +66,12 @@ export function MainDashboard({
     
   const isIncreased = monthOverMonthChange > 0;
 
-  // State for time range toggle in charts - now separate for each chart
+  // State for time range toggle in charts
   const [timeRangeSpending, setTimeRangeSpending] = useState<'week' | 'month'>('week');
   const [timeRangeCategory, setTimeRangeCategory] = useState<'week' | 'month'>('week');
+  
+  // New state for visualization type toggle
+  const [visualizationType, setVisualizationType] = useState<'time' | 'category'>('time');
   
   // Prepare spending over time data
   const spendingOverTimeData = (() => {
@@ -159,132 +163,174 @@ export function MainDashboard({
           />
         </div>
 
-        {/* Card 3 - Spending Over Time (Area Chart) */}
+        {/* Card 3 - Upcoming Payments (replacing Spending Over Time) */}
         <div className={`rounded-[30px] aspect-square max-w-[618px] w-full mx-auto overflow-hidden p-6 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-6">
               <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                Spending Over Time
+                Upcoming Payments
               </h3>
-              <div className="time-selector">
+              <button 
+                onClick={onAddPayment}
+                className="p-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-sm transition-colors duration-200 flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Add Payment
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto pr-2">
+              <UpcomingPayments
+                userId={userId}
+                onAddPayment={onAddPayment}
+                onEditPayment={onEditPayment}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4 - Combined Spending Visualizations (Pie Chart + Area Chart) */}
+        <div className={`rounded-[30px] p-6 overflow-hidden aspect-square max-w-[618px] w-full mx-auto ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                Spending Analytics
+              </h3>
+              <div className="flex">
+                {/* Visualization Type Toggle */}
+                <div className="visualization-toggle mr-2">
+                  <button 
+                    className={`px-2.5 py-1 text-xs font-medium rounded-l-lg border ${
+                      visualizationType === 'time' 
+                        ? theme === 'dark' 
+                          ? 'bg-purple-600 text-white border-purple-500' 
+                          : 'bg-lime-600 text-white border-lime-500' 
+                        : theme === 'dark' 
+                          ? 'border-gray-600 text-gray-300' 
+                          : 'border-gray-300 text-gray-600'
+                    } transition-colors`}
+                    onClick={() => setVisualizationType('time')}
+                  >
+                    Timeline
+                  </button>
+                  <button 
+                    className={`px-2.5 py-1 text-xs font-medium rounded-r-lg border ${
+                      visualizationType === 'category' 
+                        ? theme === 'dark' 
+                          ? 'bg-purple-600 text-white border-purple-500' 
+                          : 'bg-lime-600 text-white border-lime-500' 
+                        : theme === 'dark' 
+                          ? 'border-gray-600 text-gray-300' 
+                          : 'border-gray-300 text-gray-600'
+                    } transition-colors`}
+                    onClick={() => setVisualizationType('category')}
+                  >
+                    Categories
+                  </button>
+                </div>
+                
+                {/* Time Range Toggle - shown based on current visualization */}
                 <div className="time-toggle">
-                  <button 
-                    className={`time-btn ${timeRangeSpending === 'week' ? 'active' : ''}`}
-                    onClick={() => setTimeRangeSpending('week')}
-                  >
-                    Weekly
-                  </button>
-                  <button 
-                    className={`time-btn ${timeRangeSpending === 'month' ? 'active' : ''}`}
-                    onClick={() => setTimeRangeSpending('month')}
-                  >
-                    Monthly
-                  </button>
+                  {visualizationType === 'time' ? (
+                    <>
+                      <button 
+                        className={`px-2.5 py-1 text-xs font-medium rounded-l-lg border ${
+                          timeRangeSpending === 'week' 
+                            ? theme === 'dark' 
+                              ? 'bg-purple-600 text-white border-purple-500' 
+                              : 'bg-lime-600 text-white border-lime-500' 
+                            : theme === 'dark' 
+                              ? 'border-gray-600 text-gray-300' 
+                              : 'border-gray-300 text-gray-600'
+                        } transition-colors`}
+                        onClick={() => setTimeRangeSpending('week')}
+                      >
+                        Weekly
+                      </button>
+                      <button 
+                        className={`px-2.5 py-1 text-xs font-medium rounded-r-lg border ${
+                          timeRangeSpending === 'month' 
+                            ? theme === 'dark' 
+                              ? 'bg-purple-600 text-white border-purple-500' 
+                              : 'bg-lime-600 text-white border-lime-500' 
+                            : theme === 'dark' 
+                              ? 'border-gray-600 text-gray-300' 
+                              : 'border-gray-300 text-gray-600'
+                        } transition-colors`}
+                        onClick={() => setTimeRangeSpending('month')}
+                      >
+                        Monthly
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button 
+                        className={`px-2.5 py-1 text-xs font-medium rounded-l-lg border ${
+                          timeRangeCategory === 'week' 
+                            ? theme === 'dark' 
+                              ? 'bg-purple-600 text-white border-purple-500' 
+                              : 'bg-lime-600 text-white border-lime-500' 
+                            : theme === 'dark' 
+                              ? 'border-gray-600 text-gray-300' 
+                              : 'border-gray-300 text-gray-600'
+                        } transition-colors`}
+                        onClick={() => setTimeRangeCategory('week')}
+                      >
+                        Weekly
+                      </button>
+                      <button 
+                        className={`px-2.5 py-1 text-xs font-medium rounded-r-lg border ${
+                          timeRangeCategory === 'month' 
+                            ? theme === 'dark' 
+                              ? 'bg-purple-600 text-white border-purple-500' 
+                              : 'bg-lime-600 text-white border-lime-500' 
+                            : theme === 'dark' 
+                              ? 'border-gray-600 text-gray-300' 
+                              : 'border-gray-300 text-gray-600'
+                        } transition-colors`}
+                        onClick={() => setTimeRangeCategory('month')}
+                      >
+                        Monthly
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
             
             <div className="flex-1">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={spendingOverTimeData}
-                  margin={{ top: 10, right: 10, bottom: 20, left: 10 }}
-                >
-                  <defs>
-                    <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={theme === 'dark' ? '#8983f7' : '#8983f7'} stopOpacity={0.8} />
-                      <stop offset="95%" stopColor={theme === 'dark' ? '#8983f7' : '#8983f7'} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid 
-                    stroke={theme === 'dark' ? '#374151' : '#f1f5f9'} 
-                    strokeDasharray="3 3" 
-                    vertical={false}
-                  />
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fill: theme === 'dark' ? '#d1d5db' : '#64748b' }} 
-                    axisLine={{ stroke: theme === 'dark' ? '#374151' : '#e2e8f0' }}
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    tick={{ fill: theme === 'dark' ? '#d1d5db' : '#64748b' }}
-                    tickFormatter={(value) => formatCurrency(value).split('.')[0]} 
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    formatter={(value) => [formatCurrency(Number(value)), "Amount"]}
-                    contentStyle={{ 
-                      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
-                      borderColor: theme === 'dark' ? '#374151' : '#e2e8f0',
-                      borderRadius: '6px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="amount" 
-                    stroke={theme === 'dark' ? '#8983f7' : '#8983f7'} 
-                    strokeWidth={2}
-                    fillOpacity={1} 
-                    fill="url(#colorAmount)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 4 - Spending by Category (Pie Chart) */}
-        <div className={`rounded-[30px] p-6 overflow-hidden aspect-square max-w-[618px] w-full mx-auto ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                Spending by Category
-              </h3>
-              <div className="time-selector">
-                <div className="time-toggle">
-                  <button 
-                    className={`time-btn ${timeRangeCategory === 'week' ? 'active' : ''}`}
-                    onClick={() => setTimeRangeCategory('week')}
-                  >
-                    Weekly
-                  </button>
-                  <button 
-                    className={`time-btn ${timeRangeCategory === 'month' ? 'active' : ''}`}
-                    onClick={() => setTimeRangeCategory('month')}
-                  >
-                    Monthly
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex-1 flex items-center justify-center">
-              {categoryData.length > 0 ? (
+              {visualizationType === 'time' ? (
+                /* Spending Over Time Chart */
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius="30%"
-                      outerRadius="60%"
-                      paddingAngle={2}
-                      dataKey="value"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={COLORS[index % COLORS.length]} 
-                          stroke={theme === 'dark' ? '#26242e' : '#ffffff'}
-                          strokeWidth={3}
-                        />
-                      ))}
-                    </Pie>
+                  <AreaChart
+                    data={spendingOverTimeData}
+                    margin={{ top: 10, right: 10, bottom: 20, left: 10 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={theme === 'dark' ? '#8983f7' : '#8983f7'} stopOpacity={0.8} />
+                        <stop offset="95%" stopColor={theme === 'dark' ? '#8983f7' : '#8983f7'} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid 
+                      stroke={theme === 'dark' ? '#374151' : '#f1f5f9'} 
+                      strokeDasharray="3 3" 
+                      vertical={false}
+                    />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fill: theme === 'dark' ? '#d1d5db' : '#64748b' }} 
+                      axisLine={{ stroke: theme === 'dark' ? '#374151' : '#e2e8f0' }}
+                      tickLine={false}
+                    />
+                    <YAxis 
+                      tick={{ fill: theme === 'dark' ? '#d1d5db' : '#64748b' }}
+                      tickFormatter={(value) => formatCurrency(value).split('.')[0]} 
+                      axisLine={false}
+                      tickLine={false}
+                    />
                     <Tooltip
                       formatter={(value) => [formatCurrency(Number(value)), "Amount"]}
                       contentStyle={{ 
@@ -294,16 +340,65 @@ export function MainDashboard({
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                       }}
                     />
-                  </PieChart>
+                    <Area 
+                      type="monotone" 
+                      dataKey="amount" 
+                      stroke={theme === 'dark' ? '#8983f7' : '#8983f7'} 
+                      strokeWidth={2}
+                      fillOpacity={1} 
+                      fill="url(#colorAmount)"
+                    />
+                  </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full">
-                  <svg className="w-16 h-16 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                  </svg>
-                  <p className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                    No spending data for this period.
-                  </p>
+                /* Spending by Category Chart */
+                <div className="flex flex-col h-full">
+                  <div className="flex-1 flex items-center justify-center">
+                    {categoryData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={categoryData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius="30%"
+                            outerRadius="60%"
+                            paddingAngle={2}
+                            dataKey="value"
+                            labelLine={false}
+                            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                          >
+                            {categoryData.map((entry, index) => (
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={COLORS[index % COLORS.length]} 
+                                stroke={theme === 'dark' ? '#26242e' : '#ffffff'}
+                                strokeWidth={3}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value) => [formatCurrency(Number(value)), "Amount"]}
+                            contentStyle={{ 
+                              backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+                              borderColor: theme === 'dark' ? '#374151' : '#e2e8f0',
+                              borderRadius: '6px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full">
+                        <svg className="w-16 h-16 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                          No spending data for this period.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

@@ -28,20 +28,22 @@ const ThemeToggleCard = ({
               <div className="menu">
                 {onTimeRangeChange ? (
                   <div className="time-selector">
-                    <span className="time-label">View Analytics:</span>
-                    <div className="time-toggle">
-                      <button 
-                        className={`time-btn ${timeRange === 'week' ? 'active' : ''}`}
-                        onClick={() => onTimeRangeChange('week')}
-                      >
-                        Weekly
-                      </button>
-                      <button 
-                        className={`time-btn ${timeRange === 'month' ? 'active' : ''}`}
-                        onClick={() => onTimeRangeChange('month')}
-                      >
-                        Monthly
-                      </button>
+                    <div className="time-wrapper">
+                      <span className="time-label">View Analytics:</span>
+                      <div className="modern-time-toggle">
+                        <button 
+                          className={`time-btn ${timeRange === 'week' ? 'active' : ''}`}
+                          onClick={() => onTimeRangeChange('week')}
+                        >
+                          Weekly
+                        </button>
+                        <button 
+                          className={`time-btn ${timeRange === 'month' ? 'active' : ''}`}
+                          onClick={() => onTimeRangeChange('month')}
+                        >
+                          Monthly
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -136,7 +138,7 @@ const StyledWrapper = styled.div`
     opacity: 0.95;
     padding: 0.8rem 1.8rem;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
   }
 
@@ -144,10 +146,18 @@ const StyledWrapper = styled.div`
   .time-selector {
     display: flex;
     align-items: center;
+    justify-content: center;
     font-size: 12px;
     opacity: 1;
     width: 100%;
     color: white;
+  }
+  
+  .time-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
   }
 
   .time-label {
@@ -157,21 +167,22 @@ const StyledWrapper = styled.div`
     font-weight: 500;
   }
 
+  /* Legacy time toggle - kept for backward compatibility */
   .time-toggle {
-    display: flex;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    padding: 2px;
-    width: 50%;
-    justify-content: space-between;
-    gap: 2px;
+    display: none;
   }
 
-  .time-btn {
-    border: none;
+  /* Modern time toggle - styled like Spending Analytics */
+  .modern-time-toggle {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .modern-time-toggle .time-btn {
+    border: 1px solid;
     background: none;
-    border-radius: 10px;
-    height: 20px;
+    height: 24px;
     flex: 1;
     font-size: 11px;
     font-weight: 500;
@@ -179,12 +190,38 @@ const StyledWrapper = styled.div`
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: white;
-    padding: 0 8px;
+    padding: 0 12px;
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s;
   }
 
-  .time-btn.active {
-    background-color: #3b82f6;
+  .modern-time-toggle .time-btn:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-right-width: 0;
+  }
+
+  .modern-time-toggle .time-btn:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-left-width: 0;
+  }
+
+  .modern-time-toggle .time-btn.active {
+    background-color: rgba(147, 51, 234, 0.9);
+    border-color: rgba(147, 51, 234, 0.9);
+    color: white;
+  }
+
+  [type="checkbox"]:checked + .app .modern-time-toggle .time-btn {
+    border-color: rgba(107, 114, 128, 0.6);
+    color: rgba(209, 213, 219, 0.8);
+  }
+
+  [type="checkbox"]:checked + .app .modern-time-toggle .time-btn.active {
+    background-color: rgba(147, 51, 234, 0.9);
+    border-color: rgba(147, 51, 234, 0.9);
     color: white;
   }
 
@@ -197,7 +234,7 @@ const StyledWrapper = styled.div`
     width: 70%;
     flex: 1;
     justify-content: center;
-    padding-bottom: 1.5rem; /* Added padding at the bottom */
+    padding-bottom: 1.5rem;
   }
 
   .circle {
