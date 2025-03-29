@@ -8,7 +8,6 @@ import { AuthForm } from './components/AuthForm';
 import { AppHeader } from './components/AppHeader';
 import { MainDashboard } from './components/MainDashboard';
 import { BottomNavigation } from './components/BottomNavigation';
-import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { AiInsights } from './components/AiInsights';
 import { Settings } from './components/Settings';
 import { CategoryManager } from './components/CategoryManager';
@@ -16,11 +15,15 @@ import { ExpenseFormModal } from './components/ExpenseFormModal';
 import { SmartMoneyTipsModal } from './components/SmartMoneyTipsModal';
 import { PaymentFormModal } from './components/PaymentFormModal';
 import { getSmartSavingTips } from './lib/gemini';
+import { Fitness } from './components/Fitness';
+import { Academics } from './components/Academics';
+import { FitnessAI } from './components/FitnessAI';
+import { AcademicsAI } from './components/AcademicsAI';
 
 function App() {
   const [session, setSession] = useState<any>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [activeView, setActiveView] = useState('home'); // 'home', 'dashboard', 'ai', or 'settings'
+  const [activeView, setActiveView] = useState('home'); // 'home', 'fitness', 'academics', 'ai', 'fitness-ai', 'academics-ai', or 'settings'
   const [userSettings, setUserSettings] = useState<UserSettings>({
     monthlyBudget: 2000,
     currency: 'USD',
@@ -341,6 +344,9 @@ function App() {
     return <AuthForm setSession={setSession} />;
   }
 
+  // Update the main app name to reflect it's a comprehensive personal tracker
+  const appName = "Personal Tracker";
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
       theme === 'dark' 
@@ -351,9 +357,12 @@ function App() {
         theme={theme}
         onSettingsClick={() => setActiveView('settings')}
         onSignOut={handleSignOut}
+        activeView={activeView}
+        setActiveView={setActiveView}
+        onToggleTheme={toggleTheme}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
         {activeView === 'home' ? (
           <MainDashboard 
             expenses={expenses}
@@ -376,17 +385,19 @@ function App() {
             userId={session.user.id}
             onToggleTheme={toggleTheme} // Add this prop
           />
-        ) : activeView === 'dashboard' ? (
-          <div className="space-y-8">
-            <AnalyticsDashboard expenses={expenses} />
-          </div>
+        ) : activeView === 'fitness' ? (
+          <Fitness theme={theme} />
+        ) : activeView === 'academics' ? (
+          <Academics theme={theme} />
         ) : activeView === 'ai' ? (
-          <div>
-            <AiInsights 
-              expenses={expenses} 
-              onOpenTips={() => setIsTipsModalOpen(true)}
-            />
-          </div>
+          <AiInsights 
+            expenses={expenses} 
+            onOpenTips={() => setIsTipsModalOpen(true)}
+          />
+        ) : activeView === 'fitness-ai' ? (
+          <FitnessAI theme={theme} />
+        ) : activeView === 'academics-ai' ? (
+          <AcademicsAI theme={theme} />
         ) : (
           <Settings 
             settings={userSettings}

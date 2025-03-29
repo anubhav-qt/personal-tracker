@@ -29,7 +29,7 @@ export function BudgetStats({
   // Calculate percentage of budget used
   const budgetUsedPercentage = (totalSpent / monthlyBudget) * 100;
   
-  // Single time range toggle that affects all cards
+  // Independent time range toggle for budget stats
   const [timeRange, setTimeRange] = useState<'week' | 'month'>('month');
   
   // Filter expenses based on selected time range
@@ -111,14 +111,14 @@ export function BudgetStats({
   return (
     <div className="flex flex-col h-full space-y-4">
       {/* Grid layout for all controls - reorganized */}
-      <div className="grid grid-cols-2 grid-rows-2 gap-x-4 gap-y-6 h-full">
+      <div className="grid grid-cols-2 grid-rows-2 gap-x-4 gap-y-6 h-[618px] w-[618px]">
         {/* Row 2: Top Category (previously Daily Spending) and Transaction Analytics */}
         <div className="grid grid-rows-2 gap-3 h-full">
             {/* Top Category - Vertical Rectangle (previously Daily Spending) */}
             <div className={`rounded-[30px] p-4 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white border border-gray-100'} p-3 flex flex-col`}>
               <div className="flex justify-between items-center mb-2">
                 <h4 className="text-xs font-medium text-zinc-500 dark:text-gray-400">Top Category</h4>
-                <div className={`p-1.5 rounded-full ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
+                <div className={`p-1 rounded-full ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
                   <BarChart size={12} className={`${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`} />
                 </div>
               </div>
@@ -213,7 +213,7 @@ export function BudgetStats({
                   budgetRemaining >= 0 
                     ? budgetUsedPercentage > 80 
                       ? 'bg-yellow-400 dark:bg-yellow-500' 
-                      : 'bg-green-500 dark:bg-green-400' 
+                      : 'bg-gradient-to-r from-[#8983f7] to-[#a3dafb]' 
                     : 'bg-red-500 dark:bg-red-400'
                 }`}
                 style={{ width: `${Math.min(100, budgetUsedPercentage)}%` }}
@@ -249,7 +249,7 @@ export function BudgetStats({
                   Total Spent ({timeRange})
                 </h4>
                 <div className={`p-1.5 rounded-full ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
-                  <DollarSign size={12} className={`${theme === 'dark' ? 'text-blue-300' : 'text-blue-600'}`} />
+                  <DollarSign size={12} className={`${theme === 'dark' ? 'text-blue-300' : 'text-purple-600'}`} />
                 </div>
               </div>
               
@@ -278,7 +278,7 @@ export function BudgetStats({
               <div className="flex justify-between items-center mb-1">
                 <h4 className="text-xs font-medium text-zinc-500 dark:text-gray-400">Daily Spending</h4>
                 <div className={`p-1.5 rounded-full ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
-                  <Calendar size={12} className={`${theme === 'dark' ? 'text-blue-300' : 'text-blue-600'}`} />
+                  <Calendar size={12} className={`${theme === 'dark' ? 'text-blue-300' : 'text-purple-600'}`} />
                 </div>
               </div>
               

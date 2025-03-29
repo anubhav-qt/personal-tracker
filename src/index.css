@@ -78,3 +78,58 @@
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+/* Add these styles at the end of your index.css file */
+
+/* Time selector styles - matching ThemeToggleCard */
+.time-selector {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  opacity: 1;
+  color: white;
+}
+
+.time-toggle {
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 2px;
+  justify-content: space-between;
+  gap: 2px;
+}
+
+.time-btn {
+  border: none;
+  background: none;
+  border-radius: 10px;
+  height: 20px;
+  flex: 1;
+  font-size: 11px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  padding: 0 12px;
+}
+
+.time-btn.active {
+  background: linear-gradient(40deg, #8983f7, #a3dafb);
+  color: white;
+}
+
+/* Dark mode adjustments */
+.dark .time-toggle {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .time-btn {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark .time-btn.active {
+  background: linear-gradient(40deg, #8983f7, #a3dafb);
+  color: white;
+}

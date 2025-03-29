@@ -14,17 +14,17 @@ const ThemeToggleCard = ({
   onTimeRangeChange
 }: ThemeToggleCardProps) => {
   return (
-    <StyledWrapper>
-      <div>
+    <StyledWrapper className="h-full w-full">
+      <div className="h-full w-full">
         <input 
           id="switch" 
           type="checkbox" 
           checked={theme === 'dark'} 
           onChange={onToggleTheme}
         />
-        <div className="app">
-          <div className="body">
-            <div className="phone">
+        <div className="app h-full w-full">
+          <div className="body h-full w-full flex items-center justify-center">
+            <div className="phone h-full w-full">
               <div className="menu">
                 {onTimeRangeChange ? (
                   <div className="time-selector">
@@ -69,8 +69,28 @@ const ThemeToggleCard = ({
 }
 
 const StyledWrapper = styled.div`
-  /* GENERAL */
+  display: flex;
+  width: 100%;
+  height: 100%;
+  
+  > div {
+    width: 100%;
+    height: 100%;
+  }
 
+  .app {
+    display: flex;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .body {
+    flex: 1;
+    height: 100%;
+    width: 100%;
+  }
+
+  /* GENERAL */
   .credit {
     position: fixed;
     right: 2rem;
@@ -100,20 +120,14 @@ const StyledWrapper = styled.div`
   .phone {
     position: relative;
     z-index: 2;
-    width: 18rem;
-    height: 17rem;
     background-color: inherit;
     transition: background-color 0.6s;
     -webkit-box-shadow: 0 4px 35px rgba(0, 0, 0, 0.1);
     box-shadow: 0 4px 35px rgba(0, 0, 0, 0.1);
-    border-radius: 40px;
-    display: -webkit-box;
-    display: -ms-flexbox;
+    border-radius: 30px;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
     flex-direction: column;
+    padding: 0;
   }
 
   /* Top */
@@ -174,28 +188,16 @@ const StyledWrapper = styled.div`
     color: white;
   }
 
-  .icons {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    margin-top: 0.5rem;
-  }
-
   /* Middle */
   .content {
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
     flex-direction: column;
     margin: auto;
     text-align: center;
     width: 70%;
-    -webkit-transform: translateY(5%);
-    -ms-transform: translateY(5%);
-    transform: translateY(5%);
+    flex: 1;
+    justify-content: center;
+    padding-bottom: 1.5rem; /* Added padding at the bottom */
   }
 
   .circle {
@@ -223,24 +225,10 @@ const StyledWrapper = styled.div`
     width: 6rem;
     height: 6rem;
     background: #e8e8e8;
-    -webkit-transform: scale(0);
-    -ms-transform: scale(0);
     transform: scale(0);
-    -webkit-transform-origin: top right;
-    -ms-transform-origin: top right;
     transform-origin: top right;
-    -webkit-transition:
-      -webkit-transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1),
-      background-color 0.6s;
-    transition:
-      -webkit-transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1),
-      background-color 0.6s;
     transition:
       transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1),
-      background-color 0.6s;
-    transition:
-      transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1),
-      -webkit-transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1),
       background-color 0.6s;
   }
 
@@ -255,7 +243,7 @@ const StyledWrapper = styled.div`
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: 100px;
     position: relative;
-    margin: 1.8rem 0 4rem 0;
+    margin: 1.8rem 0 0 0;
     cursor: pointer;
   }
 
@@ -263,15 +251,8 @@ const StyledWrapper = styled.div`
     position: absolute;
     width: 50%;
     background-color: #fff;
-    -webkit-box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
-    -webkit-transition: -webkit-transform 0.3s
-      cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    transition: -webkit-transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    transition:
-      transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-      -webkit-transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .names {
@@ -282,15 +263,8 @@ const StyledWrapper = styled.div`
     margin-left: 17.5%;
     margin-top: 6.5%;
     position: absolute;
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-pack: justify;
-    -ms-flex-pack: justify;
     justify-content: space-between;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
   }
 
@@ -298,22 +272,17 @@ const StyledWrapper = styled.div`
     opacity: 0.5;
   }
 
-  .mark {
-    border-radius: 100px;
-    background-color: black;
-  }
-
   .time {
     color: black;
   }
+  
   /* -------- Switch Styles ------------*/
   [type="checkbox"] {
     display: none;
   }
+  
   /* Toggle */
   [type="checkbox"]:checked + .app .toggle {
-    -webkit-transform: translateX(100%);
-    -ms-transform: translateX(100%);
     transform: translateX(100%);
     background-color: #34323d;
   }
@@ -327,15 +296,15 @@ const StyledWrapper = styled.div`
     opacity: 1;
     color: white;
   }
+  
   /* App */
   [type="checkbox"]:checked + .app .phone {
     background-color: #26242e;
     color: white;
   }
+  
   /* Circle */
   [type="checkbox"]:checked + .app .crescent {
-    -webkit-transform: scale(1);
-    -ms-transform: scale(1);
     transform: scale(1);
     background: #26242e;
   }
@@ -360,16 +329,20 @@ const StyledWrapper = styled.div`
     color: white;
   }
 
-  [type="checkbox"]:checked + .app .body .phone .menu .icons .network {
-    border-color: transparent transparent white transparent;
-  }
-
-  [type="checkbox"]:checked + .app .body .phone .menu .icons .battery {
-    background-color: white;
-  }
-
   [type="checkbox"]:checked + .app .body {
-    border-radius: 40px;
+    border-radius: 30px;
+  }
+  
+  @media (max-width: 768px) {
+    .circle {
+      width: 6rem;
+      height: 6rem;
+    }
+    
+    .crescent {
+      width: 4.5rem;
+      height: 4.5rem;
+    }
   }
 `;
 
