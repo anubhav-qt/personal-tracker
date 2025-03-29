@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
-import { ArrowDown, ArrowUp, DollarSign, Activity, CreditCard, Calendar, TrendingUp, BarChart, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { DollarSign, Activity, Calendar, BarChart, AlertTriangle, CheckCircle } from 'lucide-react';
 import { UserSettings } from '../../types';
 import ThemeToggleCard from '../ThemeToggleCard';
-import { subDays, subMonths, isAfter, format } from 'date-fns';
+import { subDays, subMonths, isAfter } from 'date-fns';
 
 interface BudgetStatsProps {
   totalSpent: number;
@@ -98,24 +98,19 @@ export function BudgetStats({
     return filteredExpenses.length;
   }, [filteredExpenses]);
   
-  // Return the actual transaction count for the period instead of calculating a weekly average
-  const transactionsPerPeriod = useMemo(() => {
-    return transactionsCount; // Show the actual transaction count for the selected period
-  }, [transactionsCount]);
-  
   // Calculate total spent for the selected period
   const periodTotalSpent = useMemo(() => {
     return filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   }, [filteredExpenses]);
   
   return (
-    <div className="flex flex-col h-full space-y-4">
-      {/* Grid layout for all controls - reorganized */}
-      <div className="grid grid-cols-2 grid-rows-2 gap-x-4 gap-y-6 h-[618px] w-[618px]">
+    <div className="flex flex-col h-full w-full aspect-square">
+      {/* Grid layout for all controls - responsive layout */}
+      <div className="grid grid-cols-2 grid-rows-2 gap-x-4 gap-y-6 w-full h-full">
         {/* Row 2: Top Category (previously Daily Spending) and Transaction Analytics */}
         <div className="grid grid-rows-2 gap-3 h-full">
-            {/* Top Category - Vertical Rectangle (previously Daily Spending) */}
-            <div className={`rounded-[30px] p-4 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white border border-gray-100'} p-3 flex flex-col`}>
+            {/* Top Category - Vertical Rectangle */}
+            <div className={`rounded-[30px] p-4 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white border border-gray-100'} flex flex-col`}>
               <div className="flex justify-between items-center mb-2">
                 <h4 className="text-xs font-medium text-zinc-500 dark:text-gray-400">Top Category</h4>
                 <div className={`p-1 rounded-full ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
@@ -147,8 +142,8 @@ export function BudgetStats({
               </div>
             </div>
             
-            {/* Transaction Analytics - now using actual data */}
-            <div className={`rounded-[30px] p-4 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white border border-gray-100'} p-3 flex flex-col`}>
+            {/* Transaction Analytics */}
+            <div className={`rounded-[30px] p-4 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white border border-gray-100'} flex flex-col`}>
               <div className="flex justify-between items-center mb-2">
                 <h4 className="text-xs font-medium text-zinc-500 dark:text-gray-400">Transaction Analytics</h4>
                 <div className={`p-1 rounded-full ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
@@ -159,7 +154,7 @@ export function BudgetStats({
               <div className="flex-1 flex flex-col justify-center">
                 <div className="flex justify-center items-center">
                   <div className="text-3xl font-bold text-zinc-800 dark:text-white text-center">
-                    {transactionsCount} {/* Using direct transactionsCount */}
+                    {transactionsCount}
                   </div>
                 </div>
                 <div className="text-xs text-center mt-2 text-zinc-500 dark:text-gray-400">
@@ -180,7 +175,7 @@ export function BudgetStats({
         </div>
 
         {/* Row 1: Budget Status and Theme Toggle */}
-        <div className={`rounded-[40px] p-6 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm p-4 flex flex-col justify-between`}>
+        <div className={`rounded-[40px] p-6 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm flex flex-col justify-between`}>
           <div className="flex justify-between items-start mb-3">
             <div>
               <h4 className="text-xs font-medium text-zinc-500 dark:text-gray-400">Budget Status</h4>
@@ -240,10 +235,10 @@ export function BudgetStats({
           </div>
         </div>
 
-        {/* Row 3: Total Spent (enhanced) and Daily Spending (previously Avg. Transaction) */}
+        {/* Row 3: Total Spent (enhanced) and Daily Spending */}
         <div className="grid grid-cols-2 gap-3 h-full">
             {/* Total Spent Card - Enhanced with sparkline */}
-            <div className={`rounded-[30px] p-4 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white border border-gray-100'} p-3 flex flex-col justify-between`}>
+            <div className={`rounded-[30px] p-4 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white border border-gray-100'} flex flex-col justify-between`}>
               <div className="flex justify-between items-center mb-1">
                 <h4 className="text-xs font-medium text-zinc-500 dark:text-gray-400">
                   Total Spent ({timeRange})
@@ -274,7 +269,7 @@ export function BudgetStats({
             </div>
             
             {/* Daily Spending */}
-            <div className={`rounded-[30px] p-4 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white border border-gray-100'} p-3 flex flex-col justify-between`}>
+            <div className={`rounded-[30px] p-4 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white border border-gray-100'} flex flex-col justify-between`}>
               <div className="flex justify-between items-center mb-1">
                 <h4 className="text-xs font-medium text-zinc-500 dark:text-gray-400">Daily Spending</h4>
                 <div className={`p-1.5 rounded-full ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100'}`}>

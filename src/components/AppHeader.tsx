@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { LogOut, Settings, Menu, X, DollarSign, Dumbbell, GraduationCap, User, Moon, Sun } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { LogOut, Settings, Menu, X, DollarSign, Dumbbell, GraduationCap, User, Moon, Sun, Activity } from 'lucide-react';
 
 interface AppHeaderProps {
   theme: 'light' | 'dark';
@@ -55,11 +55,14 @@ export function AppHeader({
         <div className="flex justify-between h-16 items-center">
           {/* Logo/Brand */}
           <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-lg ${theme === 'dark' ? 'bg-purple-600' : 'bg-gradient-to-r from-purple-500 to-blue-400'} flex items-center justify-center mr-3`}>
-              <span className="text-white font-bold">FT</span>
+            <div className={`w-9 h-9 rounded-xl ${theme === 'dark' 
+              ? 'bg-gradient-to-br from-purple-600 to-blue-500' 
+              : 'bg-gradient-to-br from-purple-500 to-blue-400'
+            } flex items-center justify-center mr-3 shadow-md`}>
+              <Activity size={20} className="text-white stroke-[2.5px]" />
             </div>
             <h1 className={`text-xl font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-800'} tracking-tight`}>
-              Finance<span className={`font-bold ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>Tracker</span>
+              <span className={`font-bold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Tracker</span>
             </h1>
           </div>
           
