@@ -6,6 +6,7 @@ import {
   ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip
 } from 'recharts';
+import { ExpenseTracking } from './ExpenseTracking';
 
 interface MainDashboardProps {
   expenses: Expense[];
@@ -28,7 +29,11 @@ export function MainDashboard({
   userSettings,
   theme,
   formatCurrency,
-  onToggleTheme
+  onToggleTheme,
+  onEditExpense,
+  onAddPayment,
+  onEditPayment,
+  userId
 }: MainDashboardProps) {
   // Calculate financial metrics
   const totalSpent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -124,26 +129,18 @@ export function MainDashboard({
     <div className="w-full max-w-[1320px] mx-auto">
       {/* Main grid container with responsive columns */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">  
-        {/* Card 1 - Premium minimal look */}
-        <div className={`rounded-[30px] p-6 overflow-hidden aspect-square max-w-[618px] w-full mx-auto flex justify-center items-center ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
-          <div className="flex flex-col items-center justify-center h-full w-full p-6">
-            <div className={`rounded-full p-8 mb-6 ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-blue-50/50'}`}>
-              <svg className="w-16 h-16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
-                  stroke={theme === 'dark' ? '#94a3b8' : '#3b82f6'} 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <h3 className={`text-xl font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-              Feature 1
-            </h3>
-            <p className={`text-center max-w-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              This premium feature provides advanced analytics for your financial planning. Coming soon.
-            </p>
-          </div>
+        {/* Card 1 - Expense Tracking Feature */}
+        <div className={`rounded-[30px] p-6 overflow-hidden aspect-square max-w-[618px] w-full mx-auto ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
+          <ExpenseTracking 
+            userId={userId} 
+            onEditExpense={onEditExpense} 
+            onAddExpense={() => {
+              // This should trigger the ExpenseFormModal
+              onEditExpense(null as any); // Using null to indicate new expense
+            }} 
+            formatCurrency={formatCurrency} 
+            theme={theme} 
+          />
         </div>
 
         {/* Budget Stats - Top Right */}
