@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getExpenseInsights } from '../lib/gemini';
+import { getFinancialInsights, getSmartMoneyTips } from '../lib/gemini';
 import { Expense } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { Sparkles, Send, RefreshCw, HelpCircle, Lightbulb } from 'lucide-react';
@@ -19,6 +19,7 @@ export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
   const [displayedResponse, setDisplayedResponse] = useState('');
   const [responseIndex, setResponseIndex] = useState(0);
 
+  // Suggested prompts for the user
   const suggestedPrompts = [
     "How can I save more money this month?",
     "What's my biggest spending category and how can I reduce it?",
@@ -26,6 +27,7 @@ export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
     "What financial habits should I improve?"
   ];
 
+  // Get initial insights when the component loads
   const getInitialInsights = async () => {
     if (expenses.length === 0) {
       setAiResponse("Add some expenses to get started with AI-powered financial insights!");
@@ -36,9 +38,8 @@ export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
     setError(null);
     
     try {
-      // More conversational prompt that encourages natural responses
-      const insights = await getExpenseInsights(expenses.slice(0, 30), 
-        "What insights can you give me about my spending habits? What should I focus on to improve my finances?");
+      // Call our new function without a custom prompt to get default analysis
+      const insights = await getFinancialInsights(expenses);
       
       setAiResponse(insights);
       startTypingEffect(insights);
@@ -52,9 +53,9 @@ export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
 
   useEffect(() => {
     getInitialInsights();
-  }, []);
+  }, [expenses]); // Re-run when expenses change
 
-  // Simulate typing effect
+  // Simulate typing effect for a more dynamic feel
   const startTypingEffect = (text: string) => {
     setDisplayedResponse('');
     setResponseIndex(0);
@@ -76,6 +77,7 @@ export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
     return () => clearTimeout(typingTimer);
   }, [isTyping, responseIndex, aiResponse]);
 
+  // Handle form submission with a custom prompt
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim()) return;
@@ -85,7 +87,8 @@ export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
     setDisplayedResponse('');
     
     try {
-      const insights = await getExpenseInsights(expenses.slice(0, 30), prompt);
+      // Pass the custom prompt to our AI function
+      const insights = await getFinancialInsights(expenses, prompt);
       setAiResponse(insights);
       startTypingEffect(insights);
       setPrompt('');
@@ -97,11 +100,13 @@ export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
     }
   };
 
+  // Handle suggested prompts
   const handleSuggestedPrompt = (suggestion: string) => {
     setPrompt(suggestion);
     handleSubmitWithPrompt(suggestion);
   };
 
+  // Submit a prompt programmatically
   const handleSubmitWithPrompt = async (customPrompt: string) => {
     if (!customPrompt.trim()) return;
     
@@ -110,7 +115,7 @@ export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
     setDisplayedResponse('');
     
     try {
-      const insights = await getExpenseInsights(expenses.slice(0, 30), customPrompt);
+      const insights = await getFinancialInsights(expenses, customPrompt);
       setAiResponse(insights);
       startTypingEffect(insights);
       setPrompt('');
@@ -119,6 +124,28 @@ export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
       setError('Unable to generate insights based on your query. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Handle the lightbulb button click (if no onOpenTips provided, we show the tips directly)
+  const handleLightbulbClick = async () => {
+    if (onOpenTips) {
+      onOpenTips(); // Use the provided function if it exists
+    } else {
+      // If no handler is provided, we'll show tips directly in our component
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const tips = await getSmartMoneyTips();
+        setAiResponse(tips);
+        startTypingEffect(tips);
+      } catch (error) {
+        console.error('Error getting money tips:', error);
+        setError('Unable to generate money-saving tips at this time.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -136,17 +163,15 @@ export function AiInsights({ expenses, onOpenTips }: AiInsightsProps) {
             </p>
           </div>
         </div>
-        {onOpenTips && (
-          <button
-            onClick={onOpenTips}
-            className={`p-2 rounded-full flex items-center justify-center ${
-              theme === 'dark' ? 'bg-gray-600 hover:bg-gray-500 text-blue-400' : 'bg-blue-100 hover:bg-blue-200 text-blue-600'
-            } transition-colors duration-200`}
-            title="Smart Money Tips"
-          >
-            <Lightbulb size={18} />
-          </button>
-        )}
+        <button
+          onClick={handleLightbulbClick}
+          className={`p-2 rounded-full flex items-center justify-center ${
+            theme === 'dark' ? 'bg-gray-600 hover:bg-gray-500 text-blue-400' : 'bg-blue-100 hover:bg-blue-200 text-blue-600'
+          } transition-colors duration-200`}
+          title="Smart Money Tips"
+        >
+          <Lightbulb size={18} />
+        </button>
       </div>
       
       <div className={`p-6 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} space-y-4`}>

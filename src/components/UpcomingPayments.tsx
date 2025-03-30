@@ -280,7 +280,16 @@ export function UpcomingPayments({ userId, onAddPayment, onEditPayment }: Upcomi
     <div className="h-full flex flex-col">
       {/* Header with filters and controls */}
       <div className="flex flex-wrap justify-between items-center mb-4">
-        <div className="flex space-x-1 mb-2 sm:mb-0">
+        <div className="flex items-center mb-2">
+          <h3 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+            Upcoming Payments
+          </h3>
+          <span className={`ml-3 px-3 py-1 rounded-full text-sm ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+            {filteredPayments.length} payments
+          </span>
+        </div>
+
+        <div className="flex space-x-2 mt-2 sm:mt-0">
           <div className={`p-1 rounded-lg flex ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
             <button
               onClick={() => setViewMode('list')}
@@ -325,12 +334,16 @@ export function UpcomingPayments({ userId, onAddPayment, onEditPayment }: Upcomi
               </>
             )}
           </button>
-        </div>
-
-        <div className="flex items-center">
-          <span className={`px-3 py-1 rounded-full text-sm ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
-            {filteredPayments.length} payments
-          </span>
+          
+          {/* Add payment button styled consistently with expense tracker */}
+          <button 
+            onClick={onAddPayment}
+            className="ml-auto px-5 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-sm transition-colors duration-200 flex items-center"
+            title="Add new payment"
+          >
+            <Plus size={16} className="mr-1" />
+            <span className="text-sm">Add Payment</span>
+          </button>
         </div>
       </div>
 

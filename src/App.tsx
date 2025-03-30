@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { Expense, Category, UserSettings, UpcomingPayment } from './types';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { useExpenses } from './hooks/useExpenses';
 import { AuthForm } from './components/AuthForm';
-import { AppHeader } from './components/AppHeader';
 import { MainDashboard } from './components/MainDashboard';
 import { BottomNavigation } from './components/BottomNavigation';
 import { AiInsights } from './components/AiInsights';
@@ -14,16 +13,12 @@ import { CategoryManager } from './components/CategoryManager';
 import { ExpenseFormModal } from './components/ExpenseFormModal';
 import { SmartMoneyTipsModal } from './components/SmartMoneyTipsModal';
 import { UpcomingPaymentFormModal } from './components/UpcomingPaymentFormModal';
-import { getSmartSavingTips } from './lib/gemini';
-import { Fitness } from './components/Fitness';
-import { Academics } from './components/Academics';
-import { FitnessAI } from './components/FitnessAI';
-import { AcademicsAI } from './components/AcademicsAI';
+import { getSmartMoneyTips } from './lib/gemini';
 
 function App() {
   const [session, setSession] = useState<any>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [activeView, setActiveView] = useState('home'); // 'home', 'fitness', 'academics', 'ai', 'fitness-ai', 'academics-ai', or 'settings'
+  const [activeView, setActiveView] = useState('home'); // 'home', 'ai', or 'settings'
   const [userSettings, setUserSettings] = useState<UserSettings>({
     monthlyBudget: 2000,
     currency: 'USD',
@@ -42,8 +37,6 @@ function App() {
   // Use our custom hook to manage expenses
   const { 
     expenses,
-    isLoading: isExpenseLoading,
-    error: expensesError
   } = useExpenses(session?.user?.id);
 
   useEffect(() => {
@@ -232,10 +225,10 @@ function App() {
       
       console.log('Settings saved successfully');
       
-      // Update local state with user values but don't overwrite theme
-      setUserSettings(prev => ({
+      // Update local state
+      setUserSettings({
         ...newSettings,
-      }));
+      });
       
       // Only update currency from settings, theme is handled separately
       updateCurrency(newSettings.currency);
@@ -290,11 +283,7 @@ function App() {
     
     setIsTipsLoading(true);
     try {
-      // Calculate metrics for the prompt
-      const totalSpent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-      const budgetRemaining = userSettings.monthlyBudget - totalSpent;
-      
-      // Get top categories
+      // Get top categories for logging purposes
       const categoryMap = new Map<string, number>();
       expenses.forEach(expense => {
         const categoryName = expense.category?.name || 'Uncategorized';
@@ -302,20 +291,7 @@ function App() {
         categoryMap.set(categoryName, current + expense.amount);
       });
       
-      const topCategories = Array.from(categoryMap.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([name]) => name);
-      
-      const prompt = `I need 3-4 money-saving tips based on this financial data:
-        Total spent: ${formatCurrency(totalSpent)}
-        Monthly budget: ${formatCurrency(userSettings.monthlyBudget)}
-        Budget remaining: ${formatCurrency(budgetRemaining)}
-        Top spending categories: ${topCategories.join(', ')}
-        
-        Format as simple bullet points for easy reading.`;
-      
-      const tips = await getSmartSavingTips(prompt);
+      const tips = await getSmartMoneyTips();
       setAiTips(tips);
     } catch (error) {
       console.error('Error getting AI tips:', error);
@@ -344,25 +320,14 @@ function App() {
     return <AuthForm setSession={setSession} />;
   }
 
-  // Update the main app name to reflect it's a comprehensive personal tracker
-  const appName = "Personal Tracker";
-
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
       theme === 'dark' 
         ? 'bg-[rgb(23_23_23/1)] text-white' 
         : 'bg-zinc-50 text-black'
     } pb-24`}>
-      <AppHeader 
-        theme={theme}
-        onSettingsClick={() => setActiveView('settings')}
-        onSignOut={handleSignOut}
-        activeView={activeView}
-        setActiveView={setActiveView}
-        onToggleTheme={toggleTheme}
-      />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeView === 'home' ? (
           <MainDashboard 
             expenses={expenses}
@@ -385,19 +350,11 @@ function App() {
             userId={session.user.id}
             onToggleTheme={toggleTheme} // Add this prop
           />
-        ) : activeView === 'fitness' ? (
-          <Fitness theme={theme} />
-        ) : activeView === 'academics' ? (
-          <Academics theme={theme} />
         ) : activeView === 'ai' ? (
           <AiInsights 
             expenses={expenses} 
             onOpenTips={() => setIsTipsModalOpen(true)}
           />
-        ) : activeView === 'fitness-ai' ? (
-          <FitnessAI theme={theme} />
-        ) : activeView === 'academics-ai' ? (
-          <AcademicsAI theme={theme} />
         ) : (
           <Settings 
             settings={userSettings}
@@ -417,6 +374,8 @@ function App() {
           setEditingExpense(null);
           setIsExpenseModalOpen(true);
         }}
+        onSettingsClick={() => setActiveView('settings')}
+        onSignOut={handleSignOut}
       />
 
       {/* Modals */}
@@ -464,7 +423,6 @@ function App() {
 
 // Wrapping the export with a container component that gets the initialSettings
 function AppContainer() {
-  const [initialSettings, setInitialSettings] = useState<UserSettings | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -472,15 +430,11 @@ function AppContainer() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         try {
-          const { data, error } = await supabase
+          await supabase
             .from('user_settings')
             .select('settings')
             .eq('user_id', session.user.id)
             .single();
-
-          if (!error && data) {
-            setInitialSettings(data.settings);
-          }
         } catch (error) {
           console.error('Error fetching initial settings:', error);
         }

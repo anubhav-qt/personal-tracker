@@ -2,70 +2,54 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
-export async function getExpenseInsights(expenses: any[], customPrompt?: string) {
+// Main function to get financial insights based on expense data
+export async function getFinancialInsights(expenses: any[], customPrompt?: string) {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-    // Build system message to frame the conversation
-    const systemMessage = `You are a helpful financial assistant. Use the provided expense data as context for your answers, but respond in a natural, conversational way.
-Don't format responses with prefixes like "Based on your data" or "According to your expenses".
-Just be helpful, concise, and personalized.
-When providing lists of recommendations or steps, always use numbered points (1., 2., 3., etc.) instead of bullet points or asterisks.
-Add a new line after each numbered point so they appear as separate paragraphs.`;
+    // System instructions for the AI
+    const systemInstructions = `You are a very friendly and very knowledgable financial advisor who acts very professionally and friendly.
+Use the provided expense data as context for your answers, but respond in a natural, conversational way.
+When providing lists of recommendations or steps, always use numbered points (1., 2., 3., etc.) instead of bullet points.
+Add a new line after each numbered point for clarity.`;
+
+    // Default prompt if no custom prompt is provided
+    const defaultPrompt = `Analyze these expenses and tell me where I've spent the most money. 
+If there's enough data, identify any new spending habits formed in the last week or month.
+Provide insights in a friendly, professional tone.`;
 
     // Construct full prompt
-    const fullPrompt = customPrompt ? 
-      `${systemMessage}
+    const fullPrompt = `${systemInstructions}
 
-User Expense Data Context (for your reference only):
-${JSON.stringify(expenses.slice(0, 10), null, 2)}
+User Expense Data:
+${JSON.stringify(expenses, null, 2)}
 
-User Question: ${customPrompt}` :
-      
-      `${systemMessage}
-
-Please analyze these expenses and provide insights. Keep your response conversational and natural:
-${JSON.stringify(expenses, null, 2)}`;
+${customPrompt || defaultPrompt}`;
 
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     return response.text();
   } catch (error) {
-    console.error('Error getting AI insights:', error);
-    return 'Unable to generate insights at this time.';
+    console.error('Error getting financial insights:', error);
+    return "I'm having trouble analyzing your expenses right now. Please try again later.";
   }
 }
 
-export async function getSmartSavingTips(prompt: string) {
+// Function to get money-saving tips
+export async function getSmartMoneyTips() {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
     
-    // Enhance original prompt to request specific formatting with numbered lists
-    const enhancedPrompt = `${prompt}
+    const tipsPrompt = `You are a very friendly and very knowledgable financial advisor.
+Please provide 5 practical money-saving tips for everyday life.
+Format each tip as a numbered point (1., 2., 3., etc.) with a short title in bold, followed by a brief explanation.
+Make the tips actionable and specific.`;
     
-Important: Respond in a natural, conversational tone. When providing financial tips or advice:
-1. Use numbered lists (1., 2., 3., etc.) instead of bullet points or asterisks
-2. Format each point with a number followed by a period (like "1.")
-3. Use short, clear sentences
-4. Put a single blank line before the first numbered item
-5. Do NOT put blank lines between numbered items - just a simple newline
-6. Don't use markdown formatting like asterisks (*) or hyphens (-)
-7. Don't use phrases like "Based on your data" or "According to your expenses"
-8. Just give helpful financial insights directly using plain text
-
-EXAMPLE FORMAT:
-A short and friendly comment related to their expense data, then provide a list of tips:
-
-1. First tip here in plain text.
-2. Second tip here in plain text.
-3. Third tip here in plain text.
-4. Fourth tip here in plain text.`;
-    
-    const result = await model.generateContent(enhancedPrompt);
+    const result = await model.generateContent(tipsPrompt);
     const response = await result.response;
     return response.text();
   } catch (error) {
-    console.error('Error getting smart saving tips:', error);
-    return 'Unable to generate personalized tips at this time.';
+    console.error('Error getting smart money tips:', error);
+    return 'Unable to generate money-saving tips at this time. Please try again later.';
   }
 }

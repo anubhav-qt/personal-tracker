@@ -253,14 +253,15 @@ export function ExpenseTracking({
               All Time
             </button>
           </div>
-
-          {/* Add expense button - updated with theme toggle's crescent gradient */}
+          
+          {/* Updated Add expense button to match UpcomingPayments style */}
           <button 
             onClick={onAddExpense}
-            className="p-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-sm transition-colors duration-200"
+            className="ml-auto px-5 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-sm transition-colors duration-200 flex items-center"
             title="Add new expense"
           >
-            <Plus size={16} />
+            <Plus size={16} className="mr-1" />
+            <span className="text-sm">Add Expense</span>
           </button>
         </div>
       </div>

@@ -29,7 +29,6 @@ const ThemeToggleCard = ({
                 {onTimeRangeChange ? (
                   <div className="time-selector">
                     <div className="time-wrapper">
-                      <span className="time-label">View Analytics:</span>
                       <div className="modern-time-toggle">
                         <button 
                           className={`time-btn ${timeRange === 'week' ? 'active' : ''}`}

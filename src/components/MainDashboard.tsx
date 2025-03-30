@@ -130,11 +130,11 @@ export function MainDashboard({
   })();
 
   return (
-    <div className="w-full max-w-[1320px] mx-auto">
+    <div className="w-full max-w-[1100px] mx-auto">
       {/* Main grid container with responsive columns */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">  
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-5">  
         {/* Card 1 - Expense Tracking Feature */}
-        <div className={`rounded-[30px] p-6 overflow-hidden aspect-square max-w-[618px] w-full mx-auto ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
+        <div className={`rounded-[24px] p-5 overflow-hidden aspect-square w-full ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
           <ExpenseTracking 
             userId={userId} 
             onEditExpense={onEditExpense} 
@@ -148,7 +148,7 @@ export function MainDashboard({
         </div>
 
         {/* Budget Stats - Top Right */}
-        <div className="rounded-[30px] transition-all duration-200 max-w-[618px] w-full mx-auto">
+        <div className="rounded-[24px] transition-all duration-200 aspect-square w-full">
           <BudgetStats
             totalSpent={totalSpent}
             budgetRemaining={budgetRemaining}
@@ -164,23 +164,8 @@ export function MainDashboard({
         </div>
 
         {/* Card 3 - Upcoming Payments (replacing Spending Over Time) */}
-        <div className={`rounded-[30px] aspect-square max-w-[618px] w-full mx-auto overflow-hidden p-6 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
+        <div className={`rounded-[24px] aspect-square w-full overflow-hidden p-5 ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                Upcoming Payments
-              </h3>
-              <button 
-                onClick={onAddPayment}
-                className="p-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-sm transition-colors duration-200 flex items-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                  <path d="M12 5v14M5 12h14"/>
-                </svg>
-                Add Payment
-              </button>
-            </div>
-            
             <div className="flex-1 overflow-y-auto pr-2">
               <UpcomingPayments
                 userId={userId}
@@ -192,17 +177,17 @@ export function MainDashboard({
         </div>
 
         {/* Card 4 - Combined Spending Visualizations (Pie Chart + Area Chart) */}
-        <div className={`rounded-[30px] p-6 overflow-hidden aspect-square max-w-[618px] w-full mx-auto ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
+        <div className={`rounded-[24px] p-5 overflow-hidden aspect-square w-full ${theme === 'dark' ? 'bg-[#26242e]' : 'bg-white'} shadow-sm`}>
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-base font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
                 Spending Analytics
               </h3>
               <div className="flex">
                 {/* Visualization Type Toggle */}
                 <div className="visualization-toggle mr-2">
                   <button 
-                    className={`px-2.5 py-1 text-xs font-medium rounded-l-lg border ${
+                    className={`px-2 py-1 text-xs font-medium rounded-l-lg border ${
                       visualizationType === 'time' 
                         ? theme === 'dark' 
                           ? 'bg-purple-600 text-white border-purple-500' 
@@ -216,7 +201,7 @@ export function MainDashboard({
                     Timeline
                   </button>
                   <button 
-                    className={`px-2.5 py-1 text-xs font-medium rounded-r-lg border ${
+                    className={`px-2 py-1 text-xs font-medium rounded-r-lg border ${
                       visualizationType === 'category' 
                         ? theme === 'dark' 
                           ? 'bg-purple-600 text-white border-purple-500' 
@@ -236,7 +221,7 @@ export function MainDashboard({
                   {visualizationType === 'time' ? (
                     <>
                       <button 
-                        className={`px-2.5 py-1 text-xs font-medium rounded-l-lg border ${
+                        className={`px-2 py-1 text-xs font-medium rounded-l-lg border ${
                           timeRangeSpending === 'week' 
                             ? theme === 'dark' 
                               ? 'bg-purple-600 text-white border-purple-500' 
@@ -250,7 +235,7 @@ export function MainDashboard({
                         Weekly
                       </button>
                       <button 
-                        className={`px-2.5 py-1 text-xs font-medium rounded-r-lg border ${
+                        className={`px-2 py-1 text-xs font-medium rounded-r-lg border ${
                           timeRangeSpending === 'month' 
                             ? theme === 'dark' 
                               ? 'bg-purple-600 text-white border-purple-500' 
@@ -267,7 +252,7 @@ export function MainDashboard({
                   ) : (
                     <>
                       <button 
-                        className={`px-2.5 py-1 text-xs font-medium rounded-l-lg border ${
+                        className={`px-2 py-1 text-xs font-medium rounded-l-lg border ${
                           timeRangeCategory === 'week' 
                             ? theme === 'dark' 
                               ? 'bg-purple-600 text-white border-purple-500' 
@@ -281,7 +266,7 @@ export function MainDashboard({
                         Weekly
                       </button>
                       <button 
-                        className={`px-2.5 py-1 text-xs font-medium rounded-r-lg border ${
+                        className={`px-2 py-1 text-xs font-medium rounded-r-lg border ${
                           timeRangeCategory === 'month' 
                             ? theme === 'dark' 
                               ? 'bg-purple-600 text-white border-purple-500' 
